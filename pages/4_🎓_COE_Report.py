@@ -258,20 +258,51 @@ Report Automator"""
                 
                 email_subject_sales = st.text_input("Subject", f"COE Sales Report - {today.strftime('%B %Y')}", key="subject_sales")
                 
-                default_body_sales = f"""Hi Team,
+                # Convert table to HTML
+                table_html = display_table.to_html(index=False, border=1, classes='dataframe')
+                
+                # Style the HTML table
+                styled_table_html = table_html.replace('<table border="1" class="dataframe">', 
+                    '<table style="border-collapse:collapse; width:100%; font-family:Arial,sans-serif; font-size:13px;">')
+                styled_table_html = styled_table_html.replace('<th>', '<th style="background-color:#3498db; color:white; padding:8px; text-align:left; border:1px solid #ddd;">')
+                styled_table_html = styled_table_html.replace('<td>', '<td style="border:1px solid #ddd; padding:6px;">')
+                styled_table_html = styled_table_html.replace('<tr>', '<tr style="background-color:#f9f9f9;">')
+                
+                html_body_sales = f"""<html>
+<head>
+<style>
+body {{font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;}}
+h2 {{color: #2c3e50; font-size: 16px; margin-top: 20px;}}
+table {{border-collapse: collapse; width: 100%; margin: 15px 0;}}
+th {{background-color: #3498db; color: white; padding: 8px; text-align: left; border: 1px solid #ddd;}}
+td {{border: 1px solid #ddd; padding: 6px;}}
+tr:nth-child(even) {{background-color: #f9f9f9;}}
+</style>
+</head>
+<body>
+<p>Hi Team,</p>
+<p>Please find attached the COE Sales Report for <strong>{today.strftime('%B %Y')}</strong>.</p>
+<p>This report covers COE sales from <strong>{current_month_start.strftime('%B %d')}</strong> to <strong>{today.strftime('%B %d, %Y')}</strong>.</p>
 
-Please find attached the COE Sales Report for {today.strftime('%B %Y')}.
+<h2>📊 Sales Summary</h2>
+{styled_table_html}
 
-This report covers COE sales from {current_month_start.strftime('%B %d')} to {today.strftime('%B %d, %Y')}.
+<h2>📈 Overall Summary</h2>
+<ul>
+<li><strong>Total COE Count:</strong> {len(df_current_month)}</li>
+<li><strong>Total Sales:</strong> NPR {df_current_month[net_sales_col].sum():,.0f}</li>
+</ul>
 
-Summary:
-- Total COE Count: {len(df_current_month)}
-- Total Sales: NPR {df_current_month[net_sales_col].sum():,.0f}
+<p>Please find the detailed Excel report attached.</p>
 
-Regards,
-Report Automator"""
+<p>Best regards,<br>
+<strong>Report Automator</strong></p>
+</body>
+</html>"""
 
-                email_body_sales = st.text_area("Email Draft", default_body_sales, height=200, key="body_sales")
+                # Show preview
+                with st.expander("📧 Email Preview", expanded=False):
+                    st.components.v1.html(html_body_sales, height=600, scrolling=True)
 
                 if st.button("🚀 Send Current Month Sales Report", key="send_sales"):
                     if not sender_email or not sender_password:
@@ -284,12 +315,12 @@ Report Automator"""
                             from email.mime.base import MIMEBase
                             from email import encoders
 
-                            msg = MIMEMultipart()
+                            msg = MIMEMultipart('alternative')
                             msg['From'] = sender_email
                             msg['To'] = recipients_sales
                             msg['Subject'] = email_subject_sales
 
-                            msg.attach(MIMEText(email_body_sales, 'plain'))
+                            msg.attach(MIMEText(html_body_sales, 'html'))
 
                             part = MIMEBase('application', 'octet-stream')
                             part.set_payload(buffer2.getvalue())
