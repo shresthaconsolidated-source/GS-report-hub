@@ -255,14 +255,65 @@ Ashish Shrestha"""
                     type_data.columns = ['Sales Team', f'{coe_type}_No', f'{coe_type}_Sales']
                     final_table = final_table.merge(type_data, on='Sales Team', how='left')
                 
-                # Fill NaN with 0 or '-'
+                # Fill NaN with 0
                 final_table = final_table.fillna(0)
+                
+                # Add grand totals row
+                totals_row = {'Sales Team': 'Grand Total'}
+                totals_row['Total No of CoE'] = final_table['Total No of CoE'].sum()
+                totals_row['Total Gross Sales'] = final_table['Total Gross Sales'].sum()
+                for coe_type in sorted(coe_types):
+                    if f'{coe_type}_No' in final_table.columns:
+                        totals_row[f'{coe_type}_No'] = final_table[f'{coe_type}_No'].sum()
+                    if f'{coe_type}_Sales' in final_table.columns:
+                        totals_row[f'{coe_type}_Sales'] = final_table[f'{coe_type}_Sales'].sum()
+                
+                # Append totals row
+                final_table = pd.concat([final_table, pd.DataFrame([totals_row])], ignore_index=True)
                 
                 # Format for display
                 display_table = final_table.copy()
                 
                 # Display the table
+                st.subheader("📊 Sales Summary by Consultant")
                 st.dataframe(display_table, use_container_width=True)
+                
+                # Create targets table
+                st.subheader("🎯 Monthly Targets & Shortfall")
+                
+                TARGET_COE = 7  # Target COE per salesperson
+                
+                # Get consultant totals (excluding Grand Total row)
+                consultant_data = final_table[final_table['Sales Team'] != 'Grand Total'].copy()
+                
+                targets_table = pd.DataFrame({
+                    'Sales Team': consultant_data['Sales Team'],
+                    'Total COE': consultant_data['Total No of CoE'].astype(int),
+                    'Target': TARGET_COE,
+                    'Shortfall': (TARGET_COE - consultant_data['Total No of CoE']).astype(int)
+                })
+                
+                # Add COE type specific columns
+                for coe_type in sorted(coe_types):
+                    if f'{coe_type}_No' in consultant_data.columns:
+                        targets_table[f'{coe_type}'] = consultant_data[f'{coe_type}_No'].astype(int)
+                
+                # Add grand total for targets table
+                targets_total_row = {
+                    'Sales Team': 'Grand Total',
+                    'Total COE': int(targets_table['Total COE'].sum()),
+                    'Target': TARGET_COE * len(consultant_data),
+                    'Shortfall': int(targets_table['Shortfall'].sum())
+                }
+                for coe_type in sorted(coe_types):
+                    if coe_type in targets_table.columns:
+                        targets_total_row[coe_type] = int(targets_table[coe_type].sum())
+                
+                targets_table = pd.concat([targets_table, pd.DataFrame([targets_total_row])], ignore_index=True)
+                
+                # Display targets table
+                st.dataframe(targets_table, use_container_width=True)
+                
                 
                 # Download button for Report 2
                 buffer2 = io.BytesIO()
@@ -283,7 +334,10 @@ Ashish Shrestha"""
                 default_recipients_sales = config.get("coe_sales_recipients", "")
                 recipients_sales = st.text_input("Recipients (comma separated)", value=default_recipients_sales, key="coe_sales_recipients", help="Email recipients for Current Month Sales Report")
                 
-                email_subject_sales = st.text_input("Subject", value=f"COE Sales Report - {selected_month_date.strftime('%B %Y')}", key="subject_sales")
+                # Email subject - use unique key per month to force reactivity
+                subject_key = f"subject_sales_{selected_month_date.strftime('%Y_%m')}"
+                default_subject = f"COE Sales Report - {selected_month_date.strftime('%B %Y')}"
+                email_subject_sales = st.text_input("Subject", value=default_subject, key=subject_key)
                 
                 # Convert table to HTML
                 table_html = display_table.to_html(index=False, border=1, classes='dataframe')
