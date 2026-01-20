@@ -293,11 +293,6 @@ Ashish Shrestha"""
                     'Shortfall': (TARGET_COE - consultant_data['Total No of CoE']).astype(int)
                 })
                 
-                # Add COE type specific columns
-                for coe_type in sorted(coe_types):
-                    if f'{coe_type}_No' in consultant_data.columns:
-                        targets_table[f'{coe_type}'] = consultant_data[f'{coe_type}_No'].astype(int)
-                
                 # Add grand total for targets table
                 targets_total_row = {
                     'Sales Team': 'Grand Total',
@@ -305,9 +300,6 @@ Ashish Shrestha"""
                     'Target': TARGET_COE * len(consultant_data),
                     'Shortfall': int(targets_table['Shortfall'].sum())
                 }
-                for coe_type in sorted(coe_types):
-                    if coe_type in targets_table.columns:
-                        targets_total_row[coe_type] = int(targets_table[coe_type].sum())
                 
                 targets_table = pd.concat([targets_table, pd.DataFrame([targets_total_row])], ignore_index=True)
                 
@@ -349,6 +341,14 @@ Ashish Shrestha"""
                 styled_table_html = styled_table_html.replace('<td>', '<td style="border:1px solid #ddd; padding:6px;">')
                 styled_table_html = styled_table_html.replace('<tr>', '<tr style="background-color:#f9f9f9;">')
                 
+                # Convert targets table to HTML
+                targets_html = targets_table.to_html(index=False, border=1, classes='dataframe')
+                styled_targets_html = targets_html.replace('<table border="1" class="dataframe">', 
+                    '<table style="border-collapse:collapse; width:100%; font-family:Arial,sans-serif; font-size:13px;">')
+                styled_targets_html = styled_targets_html.replace('<th>', '<th style="background-color:#e74c3c; color:white; padding:8px; text-align:left; border:1px solid #ddd;">')
+                styled_targets_html = styled_targets_html.replace('<td>', '<td style="border:1px solid #ddd; padding:6px;">')
+                styled_targets_html = styled_targets_html.replace('<tr>', '<tr style="background-color:#f9f9f9;">')
+                
                 html_body_sales = f"""<html>
 <head>
 <style>
@@ -367,6 +367,9 @@ tr:nth-child(even) {{background-color: #f9f9f9;}}
 
 <h2>📊 Sales Summary</h2>
 {styled_table_html}
+
+<h2>🎯 Monthly Targets & Shortfall</h2>
+{styled_targets_html}
 
 <h2>📈 Overall Summary</h2>
 <ul>
