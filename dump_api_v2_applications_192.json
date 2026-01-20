@@ -1,0 +1,448 @@
+{
+  "data": {
+    "custom_fields": {
+      "ba83b9d6-9a1d-4eb3-82e6-709ebedea5e7": [
+        {
+          "id": 4,
+          "name": "Satish Gupta"
+        }
+      ]
+    },
+    "id": 192,
+    "application_id": "QFC2223391",
+    "status": "Completed",
+    "product": {
+      "id": 43,
+      "name": "Certificate IV in Commerical Cookery",
+      "branch": "Head Office",
+      "branch_id": 13,
+      "partner_name": "Queensford College",
+      "revenue_type": null
+    },
+    "workflow": {
+      "id": 1,
+      "name": "Australian Education",
+      "product_name": null,
+      "vendor_name": null
+    },
+    "progression_courses": [],
+    "progression_partners": [],
+    "additional_courses": [],
+    "client": {
+      "id": 613,
+      "phone": null,
+      "name": " ",
+      "email": null,
+      "photo": null
+    },
+    "partner": {
+      "id": 13,
+      "name": "Queensford College",
+      "currency_code": null,
+      "commission_percentage": null,
+      "logo": null
+    },
+    "application_stage_id": null,
+    "current_stage": {
+      "id": 31,
+      "name": "CoE Received - Completed ",
+      "order": 8,
+      "status": true,
+      "actions": "{\"note\":false,\"dates\":false,\"application_id\":false,\"applied_intake_date\":false}",
+      "next": null,
+      "previous": null
+    },
+    "creator": {
+      "id": 13,
+      "email_signature": null,
+      "email": "OnshoreSupport@globalselect.com.au",
+      "name": "Onshore Support ",
+      "photo": null
+    },
+    "start_date": {
+      "formatted": {
+        "month": "Oct",
+        "day": "31",
+        "year": "2022"
+      },
+      "actual": "2022-10-31T10:30:00+10:30"
+    },
+    "end_date": {
+      "formatted": {
+        "month": "Apr",
+        "day": "28",
+        "year": "2024"
+      },
+      "actual": "2024-04-28T09:30:00+09:30"
+    },
+    "assignees": [
+      {
+        "id": 13,
+        "name": "Onshore Support",
+        "email": "OnshoreSupport@globalselect.com.au",
+        "photo": "",
+        "ownership_ratio": "100.00",
+        "is_owner": 1,
+        "branch_name": "India Office"
+      }
+    ],
+    "sub_agent": null,
+    "super_agent": null,
+    "assignee": {
+      "id": 29,
+      "name": "Reception Australia Admission",
+      "branch": null
+    },
+    "completed_stages": null,
+    "stages": [
+      {
+        "short_name": "Application Submitted",
+        "order": 0,
+        "status": 1,
+        "application_id": 192,
+        "id": 22484,
+        "application_stage_id": 22484,
+        "stage_id": 114,
+        "document_checklists": []
+      },
+      {
+        "short_name": "Offer Letter Pending",
+        "order": 1,
+        "status": 1,
+        "application_id": 192,
+        "id": 1394,
+        "application_stage_id": 1394,
+        "stage_id": 2,
+        "document_checklists": [
+          {
+            "id": 743,
+            "uuid": "",
+            "document_type_id": 2,
+            "description": "Passport  ( Fist and st Page )",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 2,
+              "name": "Passport",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-07-22T08:23:50.000000Z"
+            }
+          },
+          {
+            "id": 744,
+            "uuid": "",
+            "document_type_id": 4,
+            "description": "Australia Qualification Documents",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 4,
+              "name": "Australian Qualification ",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-08-02T02:38:10.000000Z"
+            }
+          },
+          {
+            "id": 745,
+            "uuid": "",
+            "document_type_id": 5,
+            "description": "If Applicable or GAP",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 5,
+              "name": "Experience Letter",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-07-22T08:23:50.000000Z"
+            }
+          },
+          {
+            "id": 746,
+            "uuid": "",
+            "document_type_id": 3,
+            "description": "All Overseas Qualification ( Including Completion letter and Academic Transcripts)",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 3,
+              "name": "Overseas Qualifications ",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-08-02T02:38:22.000000Z"
+            }
+          },
+          {
+            "id": 747,
+            "uuid": "",
+            "document_type_id": 6,
+            "description": "Health insurance Certificate",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 6,
+              "name": "OSHC/OVHC ",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-08-02T02:38:41.000000Z"
+            }
+          },
+          {
+            "id": 748,
+            "uuid": "",
+            "document_type_id": 7,
+            "description": "English Test Score Report",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 7,
+              "name": "IELST/PTE Result ",
+              "user_id": 1,
+              "status": 1,
+              "created_at": "2022-08-02T02:38:51.000000Z",
+              "updated_at": "2022-08-02T02:38:51.000000Z"
+            }
+          },
+          {
+            "id": 749,
+            "uuid": "",
+            "document_type_id": 1,
+            "description": "Visa Grant copy",
+            "allow_client_upload": 1,
+            "is_mandatory": 0,
+            "due_date": null,
+            "due_time": null,
+            "status": 1,
+            "application_stage_id": 1394,
+            "application_id": 192,
+            "created_at": "2022-09-05T02:27:57.000000Z",
+            "updated_at": "2022-09-05T02:27:57.000000Z",
+            "document_type": {
+              "id": 1,
+              "name": "Current and All old Visa Grants ",
+              "user_id": null,
+              "status": 1,
+              "created_at": "2022-07-22T08:23:50.000000Z",
+              "updated_at": "2022-08-02T02:38:38.000000Z"
+            }
+          }
+        ]
+      },
+      {
+        "short_name": "Document Request",
+        "order": 2,
+        "status": 1,
+        "application_id": 192,
+        "id": 1396,
+        "application_stage_id": 1396,
+        "stage_id": 4,
+        "document_checklists": []
+      },
+      {
+        "short_name": "Conditional Offer Letter ",
+        "order": 3,
+        "status": 1,
+        "application_id": 192,
+        "id": 1397,
+        "application_stage_id": 1397,
+        "stage_id": 5,
+        "document_checklists": []
+      },
+      {
+        "short_name": "Full Offer Letter Pending ",
+        "order": 4,
+        "status": 1,
+        "application_id": 192,
+        "id": 1398,
+        "application_stage_id": 1398,
+        "stage_id": 6,
+        "document_checklists": []
+      },
+      {
+        "short_name": "Deferred",
+        "order": 5,
+        "status": 1,
+        "application_id": 192,
+        "id": 1395,
+        "application_stage_id": 1395,
+        "stage_id": 3,
+        "document_checklists": []
+      },
+      {
+        "short_name": "Fees Pending ",
+        "order": 6,
+        "status": 1,
+        "application_id": 192,
+        "id": 1399,
+        "application_stage_id": 1399,
+        "stage_id": 7,
+        "document_checklists": []
+      },
+      {
+        "short_name": "COE Pending ",
+        "order": 7,
+        "status": 1,
+        "application_id": 192,
+        "id": 1401,
+        "application_stage_id": 1401,
+        "stage_id": 35,
+        "document_checklists": []
+      },
+      {
+        "short_name": "CoE Received - Completed ",
+        "order": 8,
+        "status": 1,
+        "application_id": 192,
+        "id": 1400,
+        "application_stage_id": 1400,
+        "stage_id": 31,
+        "document_checklists": []
+      }
+    ],
+    "updated_at": {
+      "formatted": "23-05-2024",
+      "actual": "2024-05-23T16:38:56+09:30"
+    },
+    "created_at": {
+      "formatted": "05-09-2022",
+      "actual": "2022-09-05T11:57:57+09:30"
+    },
+    "in_queue": 1231,
+    "todo_invoices": [
+      {
+        "id": 139,
+        "due_date": "2023-08-17T05:15:31.000000Z",
+        "application_id": 192
+      },
+      {
+        "id": 140,
+        "due_date": "2023-08-17T05:16:15.000000Z",
+        "application_id": 192
+      },
+      {
+        "id": 141,
+        "due_date": "2023-08-17T05:16:52.000000Z",
+        "application_id": 192
+      },
+      {
+        "id": 142,
+        "due_date": "2023-08-17T05:17:34.000000Z",
+        "application_id": 192
+      },
+      {
+        "id": 143,
+        "due_date": "2023-08-17T05:18:08.000000Z",
+        "application_id": 192
+      },
+      {
+        "id": 144,
+        "due_date": "2023-08-17T05:18:48.000000Z",
+        "application_id": 192
+      }
+    ],
+    "discontinue_reason_title": null,
+    "permissions": {
+      "delete": true,
+      "view": true,
+      "viewProductFeeCommission": true,
+      "editProductFeeCommission": true,
+      "viewSalesForecast": true,
+      "editSalesForecast": true,
+      "payment_schedule": {
+        "setup": true,
+        "create": true,
+        "edit": true,
+        "delete": true,
+        "view_commission": true,
+        "edit_commission": true
+      },
+      "isStudyLinkVisible": false,
+      "canManageStudyLink": false,
+      "canEnrollClassroom": true,
+      "canViewActivityClassroom": true,
+      "canEditApplicationPartner": true
+    },
+    "partner_category": "Institution",
+    "product_category": "VET Course",
+    "applied_intake_date": {
+      "formatted": "2022-10-31",
+      "actual": "2022-10-31T00:00:00+00:00"
+    },
+    "expected_win_date": null,
+    "product_fee": {
+      "id": 3509,
+      "total": 17899.98,
+      "discount": 0,
+      "net_revenue": 17899.98,
+      "revenue_type": 2,
+      "has_commission": true
+    },
+    "payment_schedule": {
+      "count": 6,
+      "total_pending": 17899.65,
+      "total_invoiced": 0,
+      "total_scheduled": 0
+    },
+    "studylink": {
+      "is_synced": false,
+      "application_details": []
+    },
+    "session": {
+      "is_session_exist": false,
+      "is_enrolled_to_session": false,
+      "session_id": null,
+      "status": null,
+      "student_id": null
+    },
+    "sharedApplication": null
+  }
+}

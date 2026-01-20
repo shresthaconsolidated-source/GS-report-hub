@@ -1,0 +1,146 @@
+{
+  "data": {
+    "id": 613,
+    "tag": "system",
+    "first_name": "Amaan",
+    "last_name": "Khanna",
+    "internal_id": "613",
+    "client_identifier": "VET A",
+    "comment": null,
+    "commented_at": {
+      "formatted": "18-01-2026",
+      "actual": "2026-01-18T22:09:47+10:30"
+    },
+    "contact_preference": "Phone",
+    "full_name": "Amaan Khanna",
+    "dob": {
+      "formatted": "25-04-1998",
+      "actual": "1998-04-25"
+    },
+    "phone": {
+      "actual": "413247657",
+      "formatted": "+61413247657",
+      "country_dialing_code": 61,
+      "country_code": "AU"
+    },
+    "portal_enabled": 0,
+    "rating": "Cold",
+    "visa_type": "SC 500",
+    "photo": null,
+    "email": {
+      "primary": "amaanebrahym@gmail.com",
+      "secondary": null
+    },
+    "address": {
+      "formatted": "92 A Main Street, Beverley, SA, 5009, Australia",
+      "street": "92 A Main Street",
+      "city": "Beverley",
+      "state": "SA",
+      "zip_code": "5009",
+      "country": {
+        "id": 11,
+        "name": "Australia",
+        "country_dialing_code": "61",
+        "country_code": "AU",
+        "country_code_iso_alpha3": "AUS",
+        "photo_url": "https://agentcis-local.s3-ap-southeast-2.amazonaws.com/country_flags/au.svg"
+      },
+      "country_of_passport": {
+        "id": 103,
+        "name": "India"
+      }
+    },
+    "assignee": {
+      "id": 29,
+      "full_name": "Reception Australia Admission",
+      "avatar": null,
+      "office_name": "Australia Office",
+      "email": "reception@globalselect.com.au"
+    },
+    "updated_at": {
+      "formatted": "07-05-2025",
+      "actual": "2025-05-07T12:26:17+09:30"
+    },
+    "created_at": {
+      "formatted": "24-08-2022",
+      "actual": "2022-08-24T16:35:35+09:30"
+    },
+    "visa_expiry_date": {
+      "formatted": "04-03-2027",
+      "actual": "2027-03-04T00:00:00+00:00"
+    },
+    "application": {
+      "total": 8,
+      "inprogress": 0,
+      "completed": 5,
+      "discontinued": 3
+    },
+    "added_by": {
+      "full_name": "Satish Gupta",
+      "avatar": "https://agentcisapp.s3.ap-southeast-2.amazonaws.com/41470e88-29d9-43f9-be7f-56790d0c8227/uploads/users/photo",
+      "email": "satish@globalselect.com.au",
+      "id": 9
+    },
+    "custom_fields": {
+      "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+        {
+          "id": 28,
+          "name": "VET"
+        }
+      ],
+      "2cacc2f3-7792-476b-910c-3c1d86461477": "fb"
+    },
+    "sources": null,
+    "branch_id": 1,
+    "office": {
+      "id": 1,
+      "name": "Australia Office"
+    },
+    "permissions": {
+      "sendEmail": true,
+      "edit": true,
+      "delete": true,
+      "viewInvoice": true,
+      "manageInvoice": true,
+      "createInvoice": true,
+      "clientAssigneeChoose": true,
+      "addApplication": true,
+      "addQuotation": true,
+      "viewReferrers": true,
+      "isPremiumPlan": true,
+      "deleteClientInterestedServices": true,
+      "viewApplicationSalesForecast": true,
+      "viewInterestedServiceSalesForecast": true
+    },
+    "preferred_intake": {
+      "formatted": "-",
+      "actual": ""
+    },
+    "is_archived": false,
+    "status": "Client",
+    "passport_number": "N7587754",
+    "sales_forecast": {
+      "application": {
+        "AUD": {
+          "currency_code": "AUD",
+          "value": "17,969.98"
+        }
+      },
+      "interested_services": []
+    },
+    "followers": [],
+    "tags": [
+      {
+        "id": 3,
+        "name": "Support - ( Admission) "
+      },
+      {
+        "id": 71,
+        "name": "Courtesy Call"
+      }
+    ],
+    "is_field_changes_from_client_portal": false,
+    "reactivate": false,
+    "gender": null
+  }
+}

@@ -1,0 +1,1193 @@
+{
+  "data": [
+    {
+      "id": 5761,
+      "dob": "1997-02-22",
+      "rating": "-",
+      "city": "Marden",
+      "phone": "+61469717230",
+      "photo": null,
+      "full_name": "Muhammad Faisal Khan",
+      "first_name": "Muhammad Faisal",
+      "last_name": "Khan",
+      "source_title": "",
+      "assignee_full_name": "Info Migration",
+      "assignee_id": 67,
+      "email": "defaesal@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T22:06:41+10:30"
+      },
+      "created_at": {
+        "formatted": "09-10-2023",
+        "actual": "2023-10-09T17:25:24+10:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 4,
+        "inprogress": 1,
+        "completed": 2,
+        "discontinued": 1
+      },
+      "applications": [
+        {
+          "id": 2175,
+          "client_id": 5761,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Master of Information Technology and Systems (MITS)",
+          "partner_name": "VIT (Victorian Institute of Technology)"
+        },
+        {
+          "id": 2224,
+          "client_id": 5761,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Master of Information Technology (Advanced)",
+          "partner_name": "Torrens University Australia (TUA)"
+        },
+        {
+          "id": 3480,
+          "client_id": 5761,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Student visa (subclass 500)",
+          "partner_name": "Department of Home Affairs (DoHA)"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": "Australia",
+      "internal_id": "5761",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "YQ4144461",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 73,
+          "name": "Sales Complete - AU",
+          "pivot": {
+            "taggable_id": 5761,
+            "tag_id": 73,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 69,
+          "name": "Further Services",
+          "pivot": {
+            "taggable_id": 5761,
+            "tag_id": 69,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 71,
+          "name": "Courtesy Call",
+          "pivot": {
+            "taggable_id": 5761,
+            "tag_id": 71,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 5761,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 15569,
+      "dob": "2003-08-07",
+      "rating": "Hot",
+      "city": "Dundas Valley",
+      "phone": "+61450517867",
+      "photo": null,
+      "full_name": "Faisal Yaqoob",
+      "first_name": "Faisal",
+      "last_name": "Yaqoob",
+      "source_title": "",
+      "assignee_full_name": "Murad Ali Khan",
+      "assignee_id": 61,
+      "email": "faisalyaqoob692@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:54:32+10:30"
+      },
+      "created_at": {
+        "formatted": "06-05-2025",
+        "actual": "2025-05-06T20:04:29+09:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 10,
+        "inprogress": 7,
+        "completed": 0,
+        "discontinued": 3
+      },
+      "applications": [
+        {
+          "id": 6490,
+          "client_id": 15569,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Bachelor of Community Services",
+          "partner_name": "Acknowledge Education"
+        },
+        {
+          "id": 6500,
+          "client_id": 15569,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Bachelor of Community Services",
+          "partner_name": "Stanley College"
+        },
+        {
+          "id": 6521,
+          "client_id": 15569,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Bachelor of Nursing",
+          "partner_name": "Murdoch University"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": "Australia",
+      "internal_id": "15569",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "BR6334331",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 15569,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 18423,
+      "dob": "2007-01-17",
+      "rating": "Lost",
+      "city": null,
+      "phone": "+9779823385609",
+      "photo": null,
+      "full_name": "Ritima Bhujel",
+      "first_name": "Ritima",
+      "last_name": "Bhujel",
+      "source_title": "Facebook Paid Ad",
+      "assignee_full_name": "Reception Nepal",
+      "assignee_id": 27,
+      "email": "ritimavhujel@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:50:00+10:30"
+      },
+      "created_at": {
+        "formatted": "24-08-2025",
+        "actual": "2025-08-24T18:08:17+09:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 1,
+        "inprogress": 1,
+        "completed": 0,
+        "discontinued": 0
+      },
+      "applications": [
+        {
+          "id": 7607,
+          "client_id": 18423,
+          "status": {
+            "id": "Open",
+            "label": "In Progress"
+          },
+          "product_name": "IELTS Class",
+          "partner_name": "English Language Preparation"
+        }
+      ],
+      "assignee_office_name": "Global Select  Nepal",
+      "country_name": null,
+      "internal_id": "18423",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": null,
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Ad"
+      },
+      "tag": "npl-form",
+      "branch": {
+        "id": 2,
+        "name": "Global Select  Nepal"
+      },
+      "followers": [
+        {
+          "id": 52,
+          "first_name": "Sweta",
+          "last_name": "Shrestha",
+          "email": "sweta@globalselect.com.np",
+          "name": "Sweta Shrestha",
+          "pivot": {
+            "client_id": 18423,
+            "user_id": 52
+          }
+        }
+      ],
+      "tags": [
+        {
+          "id": 70,
+          "name": "Sales Call",
+          "pivot": {
+            "taggable_id": 18423,
+            "tag_id": 70,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 96,
+          "name": "Lost Marketing NP",
+          "pivot": {
+            "taggable_id": 18423,
+            "tag_id": 96,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": null
+    },
+    {
+      "id": 20025,
+      "dob": "1997-05-28",
+      "rating": "Hot",
+      "city": null,
+      "phone": "+61400396976",
+      "photo": null,
+      "full_name": "Muhammad Zain Iftikhar",
+      "first_name": "Muhammad",
+      "last_name": "Zain Iftikhar",
+      "source_title": "",
+      "assignee_full_name": "Murad Ali Khan",
+      "assignee_id": 61,
+      "email": "zainiftikhar20@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:44:54+10:30"
+      },
+      "created_at": {
+        "formatted": "25-11-2025",
+        "actual": "2025-11-25T07:54:02+10:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 1,
+        "inprogress": 0,
+        "completed": 1,
+        "discontinued": 0
+      },
+      "applications": [
+        {
+          "id": 7707,
+          "client_id": 20025,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Certificate III in Wall and Floor Tiling",
+          "partner_name": "Nortwest College"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": null,
+      "internal_id": "20025",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "CD1572062",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 28,
+            "name": "VET"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 20025,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 20268,
+      "dob": "2001-10-16",
+      "rating": "-",
+      "city": null,
+      "phone": "+61406675560",
+      "photo": null,
+      "full_name": "Sargun Bhatia",
+      "first_name": "Sargun",
+      "last_name": "Bhatia",
+      "source_title": "",
+      "assignee_full_name": "Reception Australia Admission",
+      "assignee_id": 29,
+      "email": "sargun1000.bhatia@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:25:53+10:30"
+      },
+      "created_at": {
+        "formatted": "08-12-2025",
+        "actual": "2025-12-08T16:08:24+10:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 1,
+        "inprogress": 0,
+        "completed": 1,
+        "discontinued": 0
+      },
+      "applications": [
+        {
+          "id": 7908,
+          "client_id": 20268,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Certificate III in Carpentry ",
+          "partner_name": "Australian Institute of Science and Technology"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": null,
+      "internal_id": "20268",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "R9642006",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 28,
+            "name": "VET"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad",
+        "43e4961d-58af-4a4c-be4c-2506008d9c8f": "",
+        "65855ca8-8b34-4673-a009-227e0686b9fc": ""
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 20268,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 12614,
+      "dob": "1993-08-19",
+      "rating": "-",
+      "city": "Mitcham",
+      "phone": "+61408637668",
+      "photo": null,
+      "full_name": "Iqra Iqbal",
+      "first_name": "Iqra",
+      "last_name": "Iqbal",
+      "source_title": "",
+      "assignee_full_name": "Info Migration",
+      "assignee_id": 67,
+      "email": "iqraiqbalcheema@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:07:00+10:30"
+      },
+      "created_at": {
+        "formatted": "30-08-2024",
+        "actual": "2024-08-30T19:35:45+09:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 7,
+        "inprogress": 2,
+        "completed": 1,
+        "discontinued": 4
+      },
+      "applications": [
+        {
+          "id": 4724,
+          "client_id": 12614,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Diploma of Nursing",
+          "partner_name": "Institute of Health and Nursing Australia"
+        },
+        {
+          "id": 4913,
+          "client_id": 12614,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Diploma of Nursing",
+          "partner_name": "Southern Cross Education Institute (SCEI)"
+        },
+        {
+          "id": 5081,
+          "client_id": 12614,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Diploma of Nursing",
+          "partner_name": "Think Education Group"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": "Australia",
+      "internal_id": "12614",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "WZ1334291",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 73,
+          "name": "Sales Complete - AU",
+          "pivot": {
+            "taggable_id": 12614,
+            "tag_id": 73,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "female"
+    },
+    {
+      "id": 17883,
+      "dob": "2004-02-12",
+      "rating": "-",
+      "city": "Marsfield",
+      "phone": "+61478586267",
+      "photo": null,
+      "full_name": "Hassan Mujtaba",
+      "first_name": "Hassan",
+      "last_name": "Mujtaba",
+      "source_title": "",
+      "assignee_full_name": "Reception Australia Admission",
+      "assignee_id": 29,
+      "email": "hsnmuj0009@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T21:02:39+10:30"
+      },
+      "created_at": {
+        "formatted": "06-08-2025",
+        "actual": "2025-08-06T13:38:59+09:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 1,
+        "inprogress": 0,
+        "completed": 1,
+        "discontinued": 0
+      },
+      "applications": [
+        {
+          "id": 7113,
+          "client_id": 17883,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Bachelor of Information Technology ",
+          "partner_name": "Charles Darwin University (CDU)"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": null,
+      "internal_id": "17883",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "BM0577464",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 17883,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 19768,
+      "dob": "2002-10-25",
+      "rating": "-",
+      "city": "Lara",
+      "phone": "+61431703344",
+      "photo": null,
+      "full_name": "Muhammad Saad Javed",
+      "first_name": "Muhammad Saad",
+      "last_name": "Javed",
+      "source_title": "",
+      "assignee_full_name": "Rabeea Rabeea",
+      "assignee_id": 94,
+      "email": "shksaad55@icloud.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T20:47:16+10:30"
+      },
+      "created_at": {
+        "formatted": "10-11-2025",
+        "actual": "2025-11-10T14:35:32+10:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 2,
+        "inprogress": 1,
+        "completed": 1,
+        "discontinued": 0
+      },
+      "applications": [
+        {
+          "id": 7703,
+          "client_id": 19768,
+          "status": {
+            "id": "Open",
+            "label": "In Progress"
+          },
+          "product_name": "Student visa (subclass 500)",
+          "partner_name": "Department of Home Affairs (DoHA)"
+        },
+        {
+          "id": 8060,
+          "client_id": 19768,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Bachelor of Construction Project Management",
+          "partner_name": "Acknowledge Education"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": "Australia",
+      "internal_id": "19768",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "HY8673942",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Murad"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 19768,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    },
+    {
+      "id": 12848,
+      "dob": "2005-06-15",
+      "rating": "-",
+      "city": null,
+      "phone": "+61437105839",
+      "photo": null,
+      "full_name": "Jasanpreet Kaur",
+      "first_name": "Jasanpreet",
+      "last_name": "Kaur",
+      "source_title": "",
+      "assignee_full_name": "Sanzu Kuikel",
+      "assignee_id": 28,
+      "email": "kaurjasanpreet008@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T20:11:35+10:30"
+      },
+      "created_at": {
+        "formatted": "12-09-2024",
+        "actual": "2024-09-12T13:56:55+09:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 7,
+        "inprogress": 0,
+        "completed": 4,
+        "discontinued": 3
+      },
+      "applications": [
+        {
+          "id": 4817,
+          "client_id": 12848,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Bachelor of Business",
+          "partner_name": "LA Trobe University"
+        },
+        {
+          "id": 4912,
+          "client_id": 12848,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Bachelor of Business",
+          "partner_name": "Swinburne University of Technology"
+        },
+        {
+          "id": 5106,
+          "client_id": 12848,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Diploma of Business (UniLink)",
+          "partner_name": "Swinburne University of Technology"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": null,
+      "internal_id": "12848",
+      "client_identifier": "HE",
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "B9304661",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Lovedeep"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 2,
+        "name": "Global Select  Nepal"
+      },
+      "followers": [
+        {
+          "id": 27,
+          "first_name": "Reception",
+          "last_name": "Nepal",
+          "email": "reception@globalselect.com.np",
+          "name": "Reception Nepal",
+          "pivot": {
+            "client_id": 12848,
+            "user_id": 27
+          }
+        },
+        {
+          "id": 52,
+          "first_name": "Sweta",
+          "last_name": "Shrestha",
+          "email": "sweta@globalselect.com.np",
+          "name": "Sweta Shrestha",
+          "pivot": {
+            "client_id": 12848,
+            "user_id": 52
+          }
+        },
+        {
+          "id": 50,
+          "first_name": "Rajendra",
+          "last_name": "Dhungana",
+          "email": "rajendra@globalselect.com.np",
+          "name": "Rajendra Dhungana",
+          "pivot": {
+            "client_id": 12848,
+            "user_id": 50
+          }
+        }
+      ],
+      "tags": [
+        {
+          "id": 70,
+          "name": "Sales Call",
+          "pivot": {
+            "taggable_id": 12848,
+            "tag_id": 70,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 12848,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "female"
+    },
+    {
+      "id": 7551,
+      "dob": "1998-09-28",
+      "rating": "Cold",
+      "city": "Merryland",
+      "phone": "+61452544146",
+      "photo": null,
+      "full_name": "Rehman Ahmed",
+      "first_name": "Rehman",
+      "last_name": "Ahmed",
+      "source_title": "",
+      "assignee_full_name": "Info Migration",
+      "assignee_id": 67,
+      "email": "chrehman090@gmail.com",
+      "secondary_email": null,
+      "updated_at": {
+        "formatted": "18-01-2026",
+        "actual": "2026-01-18T19:37:10+10:30"
+      },
+      "created_at": {
+        "formatted": "31-01-2024",
+        "actual": "2024-01-31T16:12:29+10:30"
+      },
+      "preferred_intake": {
+        "formatted": "-",
+        "actual": "-"
+      },
+      "application": {
+        "total": 9,
+        "inprogress": 4,
+        "completed": 2,
+        "discontinued": 3
+      },
+      "applications": [
+        {
+          "id": 2966,
+          "client_id": 7551,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Master of Information Technology",
+          "partner_name": "Sydney International School of Technology and Commerce"
+        },
+        {
+          "id": 3180,
+          "client_id": 7551,
+          "status": {
+            "id": "Complete",
+            "label": "Completed"
+          },
+          "product_name": "Master of Information Technology",
+          "partner_name": "Asia Pacific International College (APIC)"
+        },
+        {
+          "id": 4104,
+          "client_id": 7551,
+          "status": {
+            "id": "Discontinue",
+            "label": "Discontinued"
+          },
+          "product_name": "Master of Social Work (Qualifying)",
+          "partner_name": "Australian College of Applied Professions (ACAP)"
+        }
+      ],
+      "assignee_office_name": "Australia Office",
+      "country_name": "Australia",
+      "internal_id": "7551",
+      "client_identifier": null,
+      "permissions": {
+        "sendEmail": true,
+        "edit": true,
+        "delete": true
+      },
+      "passport_number": "ZS1167682",
+      "status": "Client",
+      "application_status": null,
+      "custom_fields": {
+        "10a5888d-f128-461f-84b6-9c7e11ef4ff1": "TBC",
+        "125f5203-6fd4-45f1-a5ef-796d35c128f1": [
+          {
+            "id": 27,
+            "name": "HE"
+          }
+        ],
+        "2cacc2f3-7792-476b-910c-3c1d86461477": "Own Ref"
+      },
+      "tag": "system",
+      "branch": {
+        "id": 1,
+        "name": "Australia Office"
+      },
+      "followers": [],
+      "tags": [
+        {
+          "id": 28,
+          "name": "Document Checklist-Melbourne",
+          "pivot": {
+            "taggable_id": 7551,
+            "tag_id": 28,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 73,
+          "name": "Sales Complete - AU",
+          "pivot": {
+            "taggable_id": 7551,
+            "tag_id": 73,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 65,
+          "name": "PLE",
+          "pivot": {
+            "taggable_id": 7551,
+            "tag_id": 65,
+            "taggable_type": "client"
+          }
+        },
+        {
+          "id": 80,
+          "name": "Sales Complete - Migration",
+          "pivot": {
+            "taggable_id": 7551,
+            "tag_id": 80,
+            "taggable_type": "client"
+          }
+        }
+      ],
+      "client_portal": "De-Activated",
+      "gender": "male"
+    }
+  ],
+  "permissions": {
+    "add": true,
+    "import": true,
+    "createApplications": true,
+    "manageAssignedOfficeClients": true
+  },
+  "links": {
+    "first": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=1",
+    "last": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=289",
+    "prev": null,
+    "next": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 289,
+    "links": [
+      {
+        "url": null,
+        "label": "&laquo; Previous",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=1",
+        "label": "1",
+        "active": true
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=2",
+        "label": "2",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=3",
+        "label": "3",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=4",
+        "label": "4",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=5",
+        "label": "5",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=6",
+        "label": "6",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=7",
+        "label": "7",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=8",
+        "label": "8",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=9",
+        "label": "9",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=10",
+        "label": "10",
+        "active": false
+      },
+      {
+        "url": null,
+        "label": "...",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=288",
+        "label": "288",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=289",
+        "label": "289",
+        "active": false
+      },
+      {
+        "url": "http://globalselect.agentcisapp.com/api/v2/clients/list?page=2",
+        "label": "Next &raquo;",
+        "active": false
+      }
+    ],
+    "path": "http://globalselect.agentcisapp.com/api/v2/clients/list",
+    "per_page": 10,
+    "to": 10,
+    "total": 2886
+  }
+}

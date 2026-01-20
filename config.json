@@ -1,1 +1,7 @@
-{"sender_email": "ashish@globalselect.com.au", "sender_password": "vefm tlxq mlyy rtxi", "recipients": "ashishoct34@gmail.com"}
+{
+    "sender_email": "ashish@globalselect.com.au",
+    "sender_password": "vefm tlxq mlyy rtxi",
+    "recipients": "ashishoct34@gmail.com",
+    "agentcis_api_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNmUxZWRmNDM3NjY5ZmMxMWM4M2IwZDdhMTZkZDk1MTYxYWQwNTUxODdjMzIxYzQyZTNjOWMzODcxYjdlNGM5MGM3Y2IxN2I1ZDFkNmJkY2QiLCJpYXQiOjE3Njg3MzU5NjYuNzEyNTcsIm5iZiI6MTc2ODczNTk2Ni43MTI1OCwiZXhwIjoxODAwMjcxOTY2LjY5NDQxNiwic3ViIjoiNDIiLCJzY29wZXMiOltdfQ.YlJ8w7eyevpI3M-1KLNS40OriU6t_nHE960VzNaia1Aj1FXaqS56Wjmxnvo7psVfhuB4qToz3TXlhURXYZT6zBTlhC69k7UFbsJ5oBpc65F-7AlXVbtuJgmX8BRNSJlXA95Q-HcBwmYkN2u99PkMrZDck47BqmDhUi4v7WhmZpBkG4gDlmfnAS3n9qmK12d-2_EY-gSqFWvqivIIW0xa9X3sDSNdTS_Zdvo6jzh-Irzmh7uJ9xin8Ls5JZa2ZhuxWBBjE283QQiH_PlNWN2zs0jzwB2JDW0KlRTkNrHvKxC7rmateecmde8DIv9ckXeBOJLC6aEJ4eLHaPWZtRf2tg1gWDEsmTUhINGuWRa4Uf2keNPLSCzleZkKmcSlh9hGgxzqMdnY8uPqstaNlS-NRLmmFUDUNKlKvvDhl5wqQrJ0G2mauoEp6jJZYRyG5pXwV5qoZiq1XH3-tzoGwjatFJKAcGf2-p32ShBwHUS_wped-C-LIK4lJGTGnI6ppHs90scVaInDlGQmN7CxdlteB3nZ5MItiCutJqCf0sOJTKpG9AdZrwvDhQ0qGpctM8pr_pU5AFUJptAnGZ8JhSLvIF0Kv_Au3ppItMBmNAEuyLmE52mwOnSmGRmP-EV_BwRsIYxptfard3MazmsIvZfSvPW78Y9LcTz9z2al9P-aYZU",
+    "agentcis_base_url": "https://globalselect.agentcisapp.com"
+}
