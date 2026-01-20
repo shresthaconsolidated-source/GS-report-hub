@@ -134,7 +134,7 @@ Summary:
 - COE Expiring (< 6 Months): {len(df_expiring_filtered)}
 
 Regards,
-Report Automator"""
+Ashish Shrestha"""
 
             email_body_expiry = st.text_area("Email Draft", default_body_expiry, height=200, key="body_expiry")
 
@@ -283,7 +283,7 @@ Report Automator"""
                 default_recipients_sales = config.get("coe_sales_recipients", "")
                 recipients_sales = st.text_input("Recipients (comma separated)", value=default_recipients_sales, key="coe_sales_recipients", help="Email recipients for Current Month Sales Report")
                 
-                email_subject_sales = st.text_input("Subject", f"COE Sales Report - {selected_month_date.strftime('%B %Y')}", key="subject_sales")
+                email_subject_sales = st.text_input("Subject", value=f"COE Sales Report - {selected_month_date.strftime('%B %Y')}", key="subject_sales")
                 
                 # Convert table to HTML
                 table_html = display_table.to_html(index=False, border=1, classes='dataframe')
@@ -323,7 +323,7 @@ tr:nth-child(even) {{background-color: #f9f9f9;}}
 <p>Please find the detailed Excel report attached.</p>
 
 <p>Best regards,<br>
-<strong>Report Automator</strong></p>
+<strong>Ashish Shrestha</strong></p>
 </body>
 </html>"""
 
