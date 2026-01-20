@@ -95,6 +95,85 @@ if uploaded_file is not None:
                 mime="application/vnd.ms-excel"
             )
             
+            # Email section for Report 1
+            st.subheader("📧 Email COE Expiry Report")
+            
+            CONFIG_FILE = "config.json"
+            
+            def load_config():
+                if os.path.exists(CONFIG_FILE):
+                    try:
+                        with open(CONFIG_FILE, "r") as f:
+                            return json.load(f)
+                    except:
+                        return {}
+                return {}
+            
+            config = load_config()
+            
+            with st.sidebar:
+                st.header("Email Configuration")
+                default_email = config.get("sender_email", "")
+                default_password = config.get("sender_password", "")
+                
+                sender_email = st.text_input("Sender Email", value=default_email, key="coe_sender")
+                sender_password = st.text_input("App Password", value=default_password, type="password", key="coe_pass")
+                st.info("Shared with all reports")
+            
+            default_recipients_expiry = config.get("coe_expiry_recipients", "")
+            recipients_expiry = st.text_input("Recipients (comma separated)", value=default_recipients_expiry, key="coe_expiry_recipients", help="Email recipients for COE Expiry Report")
+            
+            email_subject_expiry = st.text_input("Subject", f"COE Expiry Report - {datetime.now().date()}", key="subject_expiry")
+            
+            default_body_expiry = f"""Hi Team,
+
+Please find attached the COE Expiry Report for {datetime.now().date()}.
+
+Summary:
+- COE Received (Past 18 Months): {len(df_18_months_filtered)}
+- COE Expiring (< 6 Months): {len(df_expiring_filtered)}
+
+Regards,
+Report Automator"""
+
+            email_body_expiry = st.text_area("Email Draft", default_body_expiry, height=200, key="body_expiry")
+
+            if st.button("🚀 Send COE Expiry Report", key="send_expiry"):
+                if not sender_email or not sender_password:
+                    st.error("Please configure email settings in the sidebar")
+                else:
+                    try:
+                        import smtplib
+                        from email.mime.multipart import MIMEMultipart
+                        from email.mime.text import MIMEText
+                        from email.mime.base import MIMEBase
+                        from email import encoders
+
+                        msg = MIMEMultipart()
+                        msg['From'] = sender_email
+                        msg['To'] = recipients_expiry
+                        msg['Subject'] = email_subject_expiry
+
+                        msg.attach(MIMEText(email_body_expiry, 'plain'))
+
+                        part = MIMEBase('application', 'octet-stream')
+                        part.set_payload(buffer1.getvalue())
+                        encoders.encode_base64(part)
+                        part.add_header('Content-Disposition', f"attachment; filename=COE_Expiry_Report_{datetime.now().date()}.xlsx")
+                        msg.attach(part)
+
+                        server = smtplib.SMTP('smtp.gmail.com', 587)
+                        server.starttls()
+                        server.login(sender_email, sender_password)
+                        
+                        recipient_list = [r.strip() for r in recipients_expiry.split(',')]
+                        server.sendmail(sender_email, recipient_list, msg.as_string())
+                        server.quit()
+
+                        st.success(f"Email sent successfully to: {recipients_expiry}!")
+                    except Exception as e:
+                        st.error(f"Failed to send email. Error: {e}")
+            
             st.divider()
             
             # ============================================
@@ -170,6 +249,66 @@ if uploaded_file is not None:
                     file_name=f"COE_Sales_{today.strftime('%B_%Y')}.xlsx",
                     mime="application/vnd.ms-excel"
                 )
+                
+                # Email section for Report 2
+                st.subheader("📧 Email Current Month Sales Report")
+                
+                default_recipients_sales = config.get("coe_sales_recipients", "")
+                recipients_sales = st.text_input("Recipients (comma separated)", value=default_recipients_sales, key="coe_sales_recipients", help="Email recipients for Current Month Sales Report")
+                
+                email_subject_sales = st.text_input("Subject", f"COE Sales Report - {today.strftime('%B %Y')}", key="subject_sales")
+                
+                default_body_sales = f"""Hi Team,
+
+Please find attached the COE Sales Report for {today.strftime('%B %Y')}.
+
+This report covers COE sales from {current_month_start.strftime('%B %d')} to {today.strftime('%B %d, %Y')}.
+
+Summary:
+- Total COE Count: {len(df_current_month)}
+- Total Sales: NPR {df_current_month[net_sales_col].sum():,.0f}
+
+Regards,
+Report Automator"""
+
+                email_body_sales = st.text_area("Email Draft", default_body_sales, height=200, key="body_sales")
+
+                if st.button("🚀 Send Current Month Sales Report", key="send_sales"):
+                    if not sender_email or not sender_password:
+                        st.error("Please configure email settings in the sidebar")
+                    else:
+                        try:
+                            import smtplib
+                            from email.mime.multipart import MIMEMultipart
+                            from email.mime.text import MIMEText
+                            from email.mime.base import MIMEBase
+                            from email import encoders
+
+                            msg = MIMEMultipart()
+                            msg['From'] = sender_email
+                            msg['To'] = recipients_sales
+                            msg['Subject'] = email_subject_sales
+
+                            msg.attach(MIMEText(email_body_sales, 'plain'))
+
+                            part = MIMEBase('application', 'octet-stream')
+                            part.set_payload(buffer2.getvalue())
+                            encoders.encode_base64(part)
+                            part.add_header('Content-Disposition', f"attachment; filename=COE_Sales_{today.strftime('%B_%Y')}.xlsx")
+                            msg.attach(part)
+
+                            server = smtplib.SMTP('smtp.gmail.com', 587)
+                            server.starttls()
+                            server.login(sender_email, sender_password)
+                            
+                            recipient_list = [r.strip() for r in recipients_sales.split(',')]
+                            server.sendmail(sender_email, recipient_list, msg.as_string())
+                            server.quit()
+
+                            st.success(f"Email sent successfully to: {recipients_sales}!")
+                        except Exception as e:
+                            st.error(f"Failed to send email. Error: {e}")
+                
                 
             else:
                 st.warning("No COE records found for current month.")
