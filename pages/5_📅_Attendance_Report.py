@@ -30,6 +30,7 @@ st.markdown("""
 # CONSTANTS
 REQUIRED_HOURS = 8.0
 LATE_THRESHOLD = time(9, 30)
+EXIT_THRESHOLD = time(18, 0)
 CHRONIC_LATE_THRESHOLD = 0.20
 
 # DATA PROCESSING FUNCTION
@@ -68,8 +69,13 @@ def process_attendance_simple(df):
         last_out = punches.iloc[-1]
         work_hours = (last_out - first_in).total_seconds() / 3600
         
+        # LOGIC UPDATES
         is_late = first_in.time() > LATE_THRESHOLD
-        is_early_exit = work_hours < REQUIRED_HOURS
+        
+        # Strict Early Exit: Only if they left before 18:00
+        is_early_exit = last_out.time() < EXIT_THRESHOLD
+        
+        # Compliant: Must work >=8 hours AND not be late
         is_compliant = work_hours >= REQUIRED_HOURS and not is_late
         
         if is_compliant:
@@ -81,7 +87,17 @@ def process_attendance_simple(df):
         elif is_early_exit:
             note = "Early Exit"
         else:
-            note = "Compliant"
+            note = "Compliant" # Case: On time, stayed late, but < 8hrs (unlikely but possible if long break logic existed, basically irrelevant here) -> actually if < 8 hours but not early exit? 
+            # If came at 9:00, left at 18:00 -> 9 hours. Compliant.
+            # If came at 10:30 (Late), left at 18:30 -> 8 hours. IsLate=True. Not Compliant. Note="Late Entry".
+            
+            # What if came 9:00, left 17:00? Early Exit = True.
+            
+            # Simple fallback
+            if work_hours < REQUIRED_HOURS and not is_late and not is_early_exit:
+                 # Came on time, left after 6, but somehow < 8 hours? (Maybe math error or same punch)
+                 pass
+
         
         results.append({
             'Employee': emp,
@@ -112,8 +128,8 @@ HTML_TEMPLATE = """
         --text-muted: #95a5a6;
         --green: #27ae60;
         --blue: #2980b9;
-        --red: #c0392b; /* Darker red for card bg */
-        --orange: #d35400; /* Darker orange for card bg */
+        --red: #c0392b; 
+        --orange: #d35400;
         --border-color: #34495e;
     }
     
@@ -197,7 +213,7 @@ HTML_TEMPLATE = """
     /* MAIN CONTENT SPLIT */
     .main-content {
         display: grid;
-        grid-template-columns: 1.2fr 1.2fr 1fr; /* 3 Columns: Compliant, Risk, Calendar */
+        grid-template-columns: 1.2fr 1.2fr 1fr; /* 3 Columns */
         gap: 15px;
     }
     
@@ -207,6 +223,16 @@ HTML_TEMPLATE = """
         border-radius: 6px;
         overflow: hidden;
         border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .col-left {
+        /* This column will hold multiple containers */
+        background: transparent; 
+        border: none;
+        overflow: visible;
+        gap: 15px;
         display: flex;
         flex-direction: column;
     }
@@ -299,6 +325,7 @@ HTML_TEMPLATE = """
     .day-late { background: #f39c12; color: white; }
     .day-risk { background: #e74c3c; color: white; }
     .day-empty { background: transparent; }
+    .day-neutral { background: #2c3e50; color: #5d6d7e; opacity: 0.5; }
     
     /* SUMMARY STATS BELOW CALENDAR */
     .summary-stats {
@@ -385,7 +412,6 @@ HTML_TEMPLATE = """
     .badge-red { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
 
     /* LAYOUT TWEAKS FOR 3-COL */
-    .col-left { grid-column: span 1; }
     .col-mid { grid-column: span 1; }
     .col-right { grid-column: span 1; }
 
@@ -393,6 +419,7 @@ HTML_TEMPLATE = """
 </head>
 <body>
 
+<!-- DASHBOARD CONTENT -->
 <div class="dashboard-container">
     
     <!-- HEADER -->
@@ -425,24 +452,44 @@ HTML_TEMPLATE = """
     <!-- MAIN GRID 3 COLUMNS -->
     <div class="main-content">
         
-        <!-- COL 1: TOP 5 COMPLIANT -->
-        <div class="section-container col-left">
-            <div class="section-header">Top 5 Best Compliant Employees</div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th style="text-align:center;">Avg Hrs</th>
-                        <th style="text-align:center;">Dev</th>
-                    </tr>
-                </thead>
-                <tbody id="list-compliant"></tbody>
-            </table>
+        <!-- COL 1 (LEFT): STACKED COMPLIANT + LATE -->
+        <div class="col-left">
+            
+            <!-- TOP 5 COMPLIANT -->
+            <div class="section-container">
+                <div class="section-header">Top 5 Best Compliant Employees</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th style="text-align:center;">Avg Hrs</th>
+                            <th style="text-align:center;">Days</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-compliant"></tbody>
+                </table>
+            </div>
+
+            <!-- TOP 5 LATE (NEW) -->
+            <div class="section-container">
+                <div class="section-header">Top 5 Late Employees</div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th style="text-align:center;">Late</th>
+                            <th style="text-align:center;">Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-late"></tbody>
+                </table>
+            </div>
+
         </div>
 
-        <!-- COL 2: TOP 5 RISK -->
+        <!-- COL 2: TOP 10 RISK -->
         <div class="section-container col-mid">
-            <div class="section-header">Top 5 Risk Employees</div>
+            <div class="section-header">Top 10 Risk Employees</div>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -516,17 +563,32 @@ HTML_TEMPLATE = """
     }
 
     function renderTopLists() {
-        // Compliant List
-        const compliant = [...stats].sort((a,b) => b.AvgWorkHours - a.AvgWorkHours).slice(0, 5);
+        // Compliant List: Sort by CompliantDays desc, then AvgHours desc
+        // This ensures the "Best" are those who are actually compliant most often.
+        const compliant = [...stats].sort((a,b) => {
+            if (b.CompliantDays !== a.CompliantDays) return b.CompliantDays - a.CompliantDays;
+            return b.AvgWorkHours - a.AvgWorkHours;
+        }).slice(0, 5);
+        
         document.getElementById('list-compliant').innerHTML = compliant.map(emp => `
             <tr>
                 <td><div class="emp-name" onclick="openEmpDetail('${emp.Employee}')">👤 ${emp.Employee}</div></td>
                 <td style="text-align:center; font-weight:600; color:#2ecc71;">${emp.AvgWorkHours.toFixed(1)}</td>
-                <td style="text-align:center; color:#95a5a6;">${emp.AvgDeviation > 0 ? '+'+emp.AvgDeviation : emp.AvgDeviation}</td>
+                <td style="text-align:center; color:#95a5a6;">${emp.CompliantDays}</td>
             </tr>
         `).join('');
 
-        // Risk List - CHANGED TO TOP 10
+        // Late List (NEW): Sort by LateDays desc
+        const late = [...stats].sort((a,b) => b.LateDays - a.LateDays).slice(0, 5);
+        document.getElementById('list-late').innerHTML = late.map(emp => `
+            <tr>
+                <td><div class="emp-name" onclick="openEmpDetail('${emp.Employee}')">🕒 ${emp.Employee}</div></td>
+                <td style="text-align:center; color:#f39c12; font-weight:bold;">${emp.LateDays}</td>
+                <td style="text-align:center;">${emp.TotalRiskDays}</td>
+            </tr>
+        `).join('');
+
+        // Risk List
         const risk = [...stats].sort((a,b) => b.TotalRiskDays - a.TotalRiskDays).slice(0, 10);
         document.getElementById('list-risk').innerHTML = risk.map(emp => `
             <tr>
@@ -558,8 +620,7 @@ HTML_TEMPLATE = """
 
         const records = dailyData.filter(d => d.Employee === empName);
         
-        // Find date range from stats to determine month length correctly
-        // Default to current date if no records, but usually we have data
+        // Find date range
         let year, month, daysInMonth, firstDay;
         
         if (records.length > 0) {
@@ -569,7 +630,6 @@ HTML_TEMPLATE = """
             firstDay = new Date(year, month, 1).getDay();
             daysInMonth = new Date(year, month + 1, 0).getDate();
         } else {
-             // Fallback if employee has 0 records but exists in stats (unlikely but safe)
             const today = new Date();
             year = today.getFullYear();
             month = today.getMonth();
@@ -585,25 +645,21 @@ HTML_TEMPLATE = """
             <div class="stat-row"><span>Avg Hours:</span> <b style="color:#3498db">${empStats.AvgWorkHours.toFixed(1)}</b></div>
         `;
 
-        // Render empty cells for offset
         for(let i=0; i<firstDay; i++) container.insertAdjacentHTML('beforeend', '<div class="cal-day day-empty"></div>');
 
-        // Render days
         for(let d=1; d<=daysInMonth; d++) {
             const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const rec = records.find(r => r.Date === dateStr);
             let cls = 'cal-day';
             
-            // Logic: If record exists use color, else use neutral styling (same bg as header/base)
             if(rec) {
                 if(rec.IsCompliant) cls += ' day-compliant';
                 else if(rec.IsLate || rec.IsEarlyExit) cls += ' day-late';
                 else cls += ' day-risk';
             } else {
-                 // No data for this day -> show day number but neutral style
                  cls += ' day-neutral'; 
             }
-            container.insertAdjacentHTML('beforeend', `<div class="${cls}" style="${!rec ? 'background: #34495e; color: #7f8c8d;' : ''}">${d}</div>`);
+            container.insertAdjacentHTML('beforeend', `<div class="${cls}">${d}</div>`);
         }
     }
 
@@ -718,7 +774,7 @@ if uploaded_file is not None:
             # 3. INJECT HTML
             final_html = HTML_TEMPLATE.replace("{STATS_JSON}", stats_json).replace("{DAILY_JSON}", daily_json)
             
-            components.html(final_html, height=800, scrolling=True)
+            components.html(final_html, height=1000, scrolling=True) # Increased height for taller stacked column
             
         else:
             st.error("Processing failed or no data found.")
