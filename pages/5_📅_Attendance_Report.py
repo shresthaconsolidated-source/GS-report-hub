@@ -7,6 +7,119 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
+import io
+import xlsxwriter
+
+# Helper function
+def generate_excel_report(df_daily):
+    output = io.BytesIO()
+    workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+    worksheet = workbook.add_worksheet("Attendance")
+    
+    # Formats
+    header_fmt = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'border': 1, 'bg_color': '#D3D3D3'})
+    date_fmt = workbook.add_format({'num_format': 'd-mmm-yy', 'border': 1})
+    time_fmt = workbook.add_format({'border': 1, 'align': 'center'})
+    
+    # Conditional Formats (approximate based on user request)
+    late_fmt = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#9C0006', 'border': 1, 'align': 'center'}) # Red/Yellowish
+    early_fmt = workbook.add_format({'bg_color': '#FFEB9C', 'font_color': '#9C6500', 'border': 1, 'align': 'center'}) # Yellow
+    holiday_fmt = workbook.add_format({'bg_color': '#006100', 'font_color': '#FFFFFF', 'border': 1, 'align': 'center'}) # Green
+    
+    # Prepare Data Pivot
+    # Pivot to get Date x Employee structure
+    pivot = df_daily.pivot_table(index='Date', columns='Employee', values=['FirstIn', 'LastOut'], aggfunc='first')
+    
+    # Sort Columns so it's Emp1 (In, Out), Emp2 (In, Out)
+    # The columns are MultiIndex (Level0: FirstIn/LastOut, Level1: Employee)
+    # Swap to (Employee, FirstIn/LastOut)
+    pivot = pivot.swaplevel(0, 1, axis=1)
+    
+    # Get unique employees and dates
+    employees = sorted(df_daily['Employee'].unique())
+    # Create full date range
+    if not df_daily.empty:
+        dates = pd.date_range(start=pd.to_datetime(df_daily['Date']).min(), end=pd.to_datetime(df_daily['Date']).max())
+    else:
+        dates = []
+        
+    # Headers
+    worksheet.merge_range(0, 0, 1, 0, "Date", header_fmt)
+    
+    col_idx = 1
+    for emp in employees:
+        # Merge Employee Name
+        worksheet.merge_range(0, col_idx, 0, col_idx+1, emp, header_fmt)
+        # Sub Headers
+        worksheet.write(1, col_idx, "In Time", header_fmt)
+        worksheet.write(1, col_idx+1, "Out Time", header_fmt)
+        col_idx += 2
+        
+    # Data Rows
+    row_idx = 2
+    for d in dates:
+        d_str = d.strftime('%Y-%m-%d')
+        worksheet.write_datetime(row_idx, 0, d, date_fmt)
+        
+        col_idx = 1
+        for emp in employees:
+            # Check if this emp has data for this date
+            # We look up in df_daily directly or the pivot
+            # Using simple lookup to handle formatting logic easier
+            
+            day_data = df_daily[(df_daily['Employee'] == emp) & (df_daily['Date'] == d_str)]
+            
+            if not day_data.empty:
+                first_in_str = day_data.iloc[0]['FirstIn'] # String 'HH:MM:SS'
+                last_out_str = day_data.iloc[0]['LastOut']
+                is_late = day_data.iloc[0]['IsLate']
+                is_early = day_data.iloc[0]['IsEarlyExit']
+                
+                # Write In
+                fmt = late_fmt if is_late else time_fmt
+                worksheet.write(row_idx, col_idx, first_in_str, fmt)
+                
+                # Write Out
+                fmt = early_fmt if is_early else time_fmt
+                worksheet.write(row_idx, col_idx+1, last_out_str, fmt)
+            else:
+                # Absent or Holiday?
+                # Check formatting: if weekend?
+                if d.weekday() == 5: # Saturday in Nepal often holiday? Or 6 (Sunday)?
+                    # User didn't specify, but I'll leave empty or default
+                    pass
+                worksheet.write(row_idx, col_idx, "", time_fmt)
+                worksheet.write(row_idx, col_idx+1, "", time_fmt)
+                
+            col_idx += 2
+        row_idx += 1
+        
+    workbook.close()
+    return output.getvalue()
+
+
+# ... (HTML TEMPLATE STRING) ...
+
+# ... (Main App Logic) ...
+
+            # Render Dashboard
+            components.html(final_html, height=850, scrolling=True) 
+            
+            # SIDEBAR DOWNLOAD
+            st.sidebar.markdown("### 📥 Reports")
+            excel_data = generate_excel_report(df_daily)
+            st.sidebar.download_button(
+                label="Download Accounts Excel",
+                data=excel_data,
+                file_name="Attendance_Accounts_Format.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                icon="📊"
+            )
+            
+    except Exception as e:
+        import traceback
+        st.error(f"Error processing file: {e}")
+        st.write(traceback.format_exc())
 
 # PAGE SETUP
 st.set_page_config(page_title="Attendance - Monthly Overview", page_icon="📅", layout="wide")
