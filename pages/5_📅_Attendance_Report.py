@@ -1,118 +1,38 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-from datetime import datetime, time, timedelta
-import calendar
-import io
+import json
+import streamlit.components.v1 as components
+from datetime import time
 
 # PAGE SETUP
 st.set_page_config(page_title="Attendance - Monthly Overview", page_icon="📅", layout="wide")
 
-# CUSTOM CSS
+# CUSTOM CSS FOR STREAMLIT INTERFACE ONLY (e.g. File Uploader and Title)
 st.markdown("""
 <style>
     .main {
         background-color: #1a1f2e;
     }
-    
-    .page-title {
-        background: linear-gradient(135deg, #3d5a80 0%, #2c3e50 100%);
-        color: white;
+    .stApp > header {
+        background-color: transparent;
+    }
+    .stFileUploader {
         padding: 20px;
+        background: rgba(255,255,255,0.05);
         border-radius: 10px;
-        text-align: center;
-        margin-bottom: 10px;
-        font-size: 28px;
-        font-weight: bold;
     }
-    
-    .page-subtitle {
-        text-align: center;
-        color: #95a5a6;
-        font-size: 14px;
-        margin-top: -10px;
-        margin-bottom: 20px;
-    }
-    
-    .section-header {
-        background: linear-gradient(135deg, #3d5a80 0%, #2c3e50 100%);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin: 15px 0 10px 0;
-        font-weight: bold;
-        font-size: 16px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    /* Hide Streamlit default dialog styling */
-    [data-testid="stDialog"] {
-        background: rgba(0,0,0,0.85) !important;
-    }
-    
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-        margin: 10px 0;
-    }
-    
-    .calendar-day {
-        padding: 10px;
-        text-align: center;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-    
-    .day-compliant {
-        background-color: #27ae60;
-        color: white;
-    }
-    
-    .day-warning {
-        background-color: #f39c12;
-        color: white;
-    }
-    
-    .day-risk {
-        background-color: #e74c3c;
-        color: white;
-    }
-    
-    .day-empty {
-        background-color: #34495e;
-        color: #7f8c8d;
-    }
-    
-   .employee-button {
-        background: transparent;
-        border: 1px solid #3498db;
-        color: #3498db;
-        padding: 8px 16px;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    
-    .employee-button:hover {
-        background: #3498db;
+    h1 {
         color: white;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# TITLE
-st.markdown("<div class='page-title'>📅 Employee Attendance - Monthly Overview</div>", unsafe_allow_html=True)
-st.markdown("<p class='page-subtitle'>Work Hours: 9:30 AM – 6:00 PM</p>", unsafe_allow_html=True)
-
 # CONSTANTS
-WORK_START_TIME = time(9, 30)
 REQUIRED_HOURS = 8.0
 LATE_THRESHOLD = time(9, 30)
 CHRONIC_LATE_THRESHOLD = 0.20
 
-# DATA PROCESSING
+# DATA PROCESSING FUNCTION
 def process_attendance_simple(df):
     df.columns = df.columns.str.strip()
     
@@ -132,7 +52,7 @@ def process_attendance_simple(df):
     
     df['Timestamp'] = pd.to_datetime(df[datetime_col], dayfirst=True, errors='coerce')
     df = df.dropna(subset=['Timestamp'])
-    df['Date'] = df['Timestamp'].dt.date
+    df['Date'] = df['Timestamp'].dt.strftime('%Y-%m-%d')
     df['Employee'] = df[name_col].astype(str).str.strip()
     
     results = []
@@ -166,87 +86,580 @@ def process_attendance_simple(df):
         results.append({
             'Employee': emp,
             'Date': date,
-            'FirstIn': first_in,
-            'LastOut': last_out,
-            'WorkHours': work_hours,
-            'IsLate': is_late,
-            'IsEarlyExit': is_early_exit,
-            'IsCompliant': is_compliant,
+            'FirstIn': first_in.strftime('%H:%M:%S'),
+            'LastOut': last_out.strftime('%H:%M:%S'),
+            'WorkHours': round(work_hours, 1),
+            'IsLate': bool(is_late),
+            'IsEarlyExit': bool(is_early_exit),
+            'IsCompliant': bool(is_compliant),
             'Note': note
         })
     
     return pd.DataFrame(results)
 
-# MODAL DIALOG DEFINITIONS
-@st.dialog("🔴 Chronic Late Employees (Late ≥20% of days)", width="large")
-def show_chronic_late_modal(employee_stats):
-    chronic_late_emps = employee_stats[employee_stats['ChronicLate']][['Employee', 'LateDays', 'PresentDays']].copy()
-    chronic_late_emps['Late %'] = (chronic_late_emps['LateDays'] / chronic_late_emps['PresentDays'] * 100).round(1)
+# PURE HTML/JS DASHBOARD TEMPLATE
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    /* RESET & BASE STYLES */
+    :root {{
+        --bg-color: #1a1f2e;
+        --card-bg: #2c3e50;
+        --text-color: white;
+        --green: #27ae60;
+        --blue: #3498db;
+        --red: #e74c3c;
+        --orange: #f39c12;
+    }}
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }}
     
-    st.dataframe(
-        chronic_late_emps,
-        use_container_width=True,
-        height=400,
-        hide_index=True
-    )
+    /* DASHBOARD GRID */
+    .dashboard-container {{
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 10px;
+    }}
+    
+    /* HEADER */
+    .header {{
+        background: linear-gradient(135deg, #3d5a80 0%, #2c3e50 100%);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 20px;
+    }}
+    .header h1 {{ margin: 0; font-size: 24px; }}
+    .header p {{ margin: 5px 0 0 0; color: #bdc3c7; font-size: 14px; }}
+    
+    /* METRIC CARDS ROW */
+    .metrics-row {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }}
+    
+    .metric-card {{
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        height: 120px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }}
+    
+    .metric-title {{ font-size: 13px; text-transform: uppercase; margin-bottom: 10px; opacity: 0.9; }}
+    .metric-value {{ font-size: 42px; font-weight: bold; margin: 0; }}
+    .metric-hint {{ font-size: 11px; margin-top: 5px; opacity: 0.8; font-style: italic; }}
+    
+    .card-green {{ background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }}
+    .card-blue {{ background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }}
+    .card-red {{ background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); cursor: pointer; transition: transform 0.2s; }}
+    .card-orange {{ background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); cursor: pointer; transition: transform 0.2s; }}
+    
+    .card-red:hover, .card-orange:hover {{ transform: scale(1.05); z-index: 10; }}
 
-@st.dialog("🟠 Employees Under 8 Hours Average", width="large")
-def show_under_hours_modal(employee_stats):
-    under_hours_emps = employee_stats[employee_stats['UnderHours']][['Employee', 'AvgWorkHours', 'PresentDays']].copy()
-    under_hours_emps['AvgWorkHours'] = under_hours_emps['AvgWorkHours'].round(1)
-    under_hours_emps.columns = ['Employee', 'Avg Work Hours', 'Present Days']
+    /* MAIN CONTENT SPLIT */
+    .main-content {{
+        display: grid;
+        grid-template-columns: 2fr 1.2fr;
+        gap: 20px;
+    }}
     
-    st.dataframe(
-        under_hours_emps,
-        use_container_width=True,
-        height=400,
-        hide_index=True
-    )
+    /* TABLES SECTION */
+    .section-header {{
+        background: #2c3e50;
+        padding: 10px 15px;
+        border-radius: 8px 8px 0 0;
+        font-weight: bold;
+        border-bottom: 1px solid #34495e;
+    }}
+    
+    .data-table-container {{
+        background: #232d3f;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }}
+    
+    .data-row {{
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 15px;
+        border-bottom: 1px solid #34495e;
+        align-items: center;
+    }}
+    .data-row:last-child {{ border-bottom: none; }}
+    
+    .emp-btn {{
+        background: transparent;
+        border: 1px solid #3498db;
+        color: #3498db;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        text-align: left;
+    }}
+    .emp-btn:hover {{ background: #3498db; color: white; }}
+    
+    .metric-small {{ font-size: 14px; font-weight: bold; }}
+    .metric-label {{ font-size: 11px; color: #95a5a6; }}
+    
+    /* CALENDAR SECTION */
+    .calendar-wrapper {{
+        background: #232d3f;
+        border-radius: 8px;
+        padding: 15px;
+    }}
+    .cal-controls {{ display: flex; gap: 10px; margin-bottom: 15px; }}
+    .cal-select {{ background: #34495e; color: white; border: none; padding: 5px; border-radius: 4px; flex: 1; }}
+    
+    .cal-grid {{
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin-top: 10px;
+    }}
+    .cal-header {{ text-align: center; font-size: 11px; color: #95a5a6; padding-bottom: 5px; }}
+    .cal-day {{
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        border-radius: 4px;
+        background: #2c3e50;
+    }}
+    .day-compliant {{ background: var(--green); }}
+    .day-late {{ background: var(--orange); }}
+    .day-risk {{ background: var(--red); }}
+    .day-empty {{ opacity: 0; }}
+    
+    /* MODAL OVERLAY */
+    .modal-overlay {{
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }}
+    
+    .modal-content {{
+        background: #1a1f2e;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #34495e;
+    }}
+    
+    .modal-header {{
+        padding: 15px 20px;
+        background: #2c3e50;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 18px;
+    }}
+    
+    .close-btn {{
+        background: none;
+        border: none;
+        color: #95a5a6;
+        cursor: pointer;
+        font-size: 24px;
+    }}
+    .close-btn:hover {{ color: white; }}
+    
+    .modal-body {{
+        padding: 20px;
+        overflow-y: auto;
+    }}
+    
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {{ width: 8px; }}
+    ::-webkit-scrollbar-track {{ background: #1a1f2e; }}
+    ::-webkit-scrollbar-thumb {{ background: #34495e; border-radius: 4px; }}
+    ::-webkit-scrollbar-thumb:hover {{ background: #5d6d7e; }}
+    
+    /* HTML TABLE STYLES */
+    .detail-table {{
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }}
+    .detail-table th {{ text-align: left; padding: 10px; border-bottom: 2px solid #34495e; color: #bdc3c7; }}
+    .detail-table td {{ padding: 10px; border-bottom: 1px solid #2c3e50; }}
+    .tag {{ padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }}
+    .tag-green {{ background: rgba(39, 174, 96, 0.2); color: #2ecc71; }}
+    .tag-orange {{ background: rgba(243, 156, 18, 0.2); color: #f1c40f; }}
+    .tag-red {{ background: rgba(231, 76, 60, 0.2); color: #e74c3c; }}
 
-@st.dialog("👤 Employee Attendance Details", width="large")
-def show_employee_details_modal(df_daily, employee_name):
-    st.subheader(f"{employee_name}")
-    
-    emp_records = df_daily[df_daily['Employee'] == employee_name].copy()
-    emp_records['Date'] = pd.to_datetime(emp_records['Date']).dt.strftime('%Y-%m-%d')
-    emp_records['Entry'] = emp_records['FirstIn'].dt.strftime('%H:%M:%S')
-    emp_records['Exit'] = emp_records['LastOut'].dt.strftime('%H:%M:%S')
-    emp_records['Working Hours'] = emp_records['WorkHours'].round(2)
-    
-    detail_table = emp_records[['Employee', 'Date', 'Entry', 'Exit', 'Working Hours', 'Note']]
-    
-    st.dataframe(
-        detail_table,
-        use_container_width=True,
-        height=500,
-        hide_index=True
-    )
+</style>
+</head>
+<body>
 
-# FILE UPLOAD
-uploaded_file = st.file_uploader("📤 Upload Excel Attendance Sheet", type=['xlsx', 'xls', 'csv'])
+<!-- DASHBOARD CONTENT -->
+<div class="dashboard-container">
+    
+    <!-- HEADER -->
+    <div class="header">
+        <h1>Monthly Management Snapshot</h1>
+    </div>
+
+    <!-- METRICS ROW -->
+    <div class="metrics-row">
+        <div class="metric-card card-green">
+            <div class="metric-title">Avg Attendance</div>
+            <div class="metric-value" id="val-attendance">--%</div>
+        </div>
+        <div class="metric-card card-blue">
+            <div class="metric-title">Average Net Work Hrs</div>
+            <div class="metric-value" id="val-hours">-- hrs</div>
+        </div>
+        <div class="metric-card card-red" onclick="openModal('chronic')">
+            <div class="metric-title">Chronic Late</div>
+            <div class="metric-value" id="val-chronic">--%</div>
+            <div class="metric-hint">👆 Click for details</div>
+        </div>
+        <div class="metric-card card-orange" onclick="openModal('under')">
+            <div class="metric-title">Under 8hrs</div>
+            <div class="metric-value" id="val-under">--%</div>
+            <div class="metric-hint">👆 Click for details</div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        
+        <!-- LEFT COLUMN: LISTS -->
+        <div class="left-col">
+            <!-- TOP 5 COMPLIANT -->
+            <div class="data-table-container">
+                <div class="section-header">Top 5 Best Compliant Employees</div>
+                <div id="list-compliant"></div>
+            </div>
+
+            <!-- TOP 5 RISK -->
+            <div class="data-table-container">
+                <div class="section-header">Top 5 Risk Employees</div>
+                <div id="list-risk"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: CALENDAR -->
+        <div class="right-col">
+            <div class="calendar-wrapper">
+                <div class="section-header" style="margin: -15px -15px 15px -15px; border-radius: 8px 8px 0 0;">Employee Calendar & Stats</div>
+                
+                <div class="cal-controls">
+                    <select id="emp-select" class="cal-select" onchange="renderCalendar()"></select>
+                </div>
+                
+                <!-- Weekday Headers -->
+                <div class="cal-grid" style="margin-bottom: 5px;">
+                    <div class="cal-header">SUN</div><div class="cal-header">MON</div>
+                    <div class="cal-header">TUE</div><div class="cal-header">WED</div>
+                    <div class="cal-header">THU</div><div class="cal-header">FRI</div>
+                    <div class="cal-header">SAT</div>
+                </div>
+                
+                <!-- Calendar Days -->
+                <div id="calendar-grid" class="cal-grid"></div>
+                
+                <!-- Summary Stats -->
+                <div id="emp-summary" style="margin-top: 15px; font-size: 13px;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal" class="modal-overlay" onclick="if(event.target === this) closeModal()">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modal-title">Details</span>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // DATA INJECTION POINT
+    const stats = {STATS_JSON};
+    const dailyData = {DAILY_JSON};
+    
+    // UTILS
+    function init() {{
+        updateMetrics();
+        renderTopLists();
+        populateEmployeeSelect();
+        renderCalendar(); // Initial render for first employee
+    }}
+
+    function updateMetrics() {{
+        const totalEmp = stats.length;
+        if(totalEmp === 0) return;
+
+        const avgAtt = stats.reduce((sum, s) => sum + s.AttendancePct, 0) / totalEmp;
+        const avgHrs = stats.reduce((sum, s) => sum + s.AvgWorkHours, 0) / totalEmp;
+        const chronicCount = stats.filter(s => s.ChronicLate).length;
+        const underCount = stats.filter(s => s.UnderHours).length;
+
+        document.getElementById('val-attendance').textContent = Math.round(avgAtt) + '%';
+        document.getElementById('val-hours').textContent = avgHrs.toFixed(1) + ' hrs';
+        document.getElementById('val-chronic').textContent = Math.round((chronicCount / totalEmp) * 100) + '%';
+        document.getElementById('val-under').textContent = Math.round((underCount / totalEmp) * 100) + '%';
+    }}
+
+    function renderTopLists() {{
+        // Top 5 Compliant
+        const compliant = [...stats].sort((a,b) => b.AvgWorkHours - a.AvgWorkHours).slice(0, 5);
+        const compContainer = document.getElementById('list-compliant');
+        compContainer.innerHTML = compliant.map(emp => `
+            <div class="data-row">
+                <button class="emp-btn" onclick="openEmpDetail('${emp.Employee}')">👤 ${emp.Employee}</button>
+                <div style="text-align: right;">
+                    <div class="metric-small">${emp.AvgWorkHours.toFixed(1)} hrs</div>
+                    <div class="metric-label">Avg Hours</div>
+                </div>
+                <div style="text-align: right; width: 60px;">
+                    <div class="metric-small">${emp.AvgDeviation}</div>
+                    <div class="metric-label">Dev</div>
+                </div>
+            </div>
+        `).join('');
+
+        // Top 5 Risk
+        const risk = [...stats].sort((a,b) => b.TotalRiskDays - a.TotalRiskDays).slice(0, 5);
+        const riskContainer = document.getElementById('list-risk');
+        riskContainer.innerHTML = risk.map(emp => `
+            <div class="data-row">
+                <button class="emp-btn" onclick="openEmpDetail('${emp.Employee}')">⚠️ ${emp.Employee}</button>
+                <div style="text-align: right;">
+                    <div class="metric-small">${emp.LateDays}</div>
+                    <div class="metric-label">Late</div>
+                </div>
+                 <div style="text-align: right;">
+                    <div class="metric-small">${emp.EarlyExitDays}</div>
+                    <div class="metric-label">Early</div>
+                </div>
+                <div style="text-align: right; width: 50px;">
+                    <div class="metric-small" style="color: #e74c3c;">${emp.TotalRiskDays}</div>
+                    <div class="metric-label">Risk</div>
+                </div>
+            </div>
+        `).join('');
+    }}
+
+    function populateEmployeeSelect() {{
+        const select = document.getElementById('emp-select');
+        stats.sort((a,b) => a.Employee.localeCompare(b.Employee)).forEach(s => {{
+            const opt = document.createElement('option');
+            opt.value = s.Employee;
+            opt.textContent = s.Employee;
+            select.appendChild(opt);
+        }});
+    }}
+
+    function renderCalendar() {{
+        const empName = document.getElementById('emp-select').value;
+        const container = document.getElementById('calendar-grid');
+        const summaryDiv = document.getElementById('emp-summary');
+        container.innerHTML = '';
+        
+        if(!empName) return;
+
+        const records = dailyData.filter(d => d.Employee === empName);
+        if(records.length === 0) return;
+
+        // Determine month from first record
+        const dateObj = new Date(records[0].Date);
+        const year = dateObj.getFullYear();
+        const month = dateObj.getMonth(); // 0-indexed
+        
+        // Month stats
+        const empStats = stats.find(s => s.Employee === empName);
+        summaryDiv.innerHTML = `
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #34495e; padding:5px 0;">
+                <span>Present: <b>${empStats.PresentDays}</b></span>
+                <span style="color:#f39c12">Late: <b>${empStats.LateDays}</b></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:5px 0;">
+                <span style="color:#e74c3c">Early Exit: <b>${empStats.EarlyExitDays}</b></span>
+                <span style="color:#3498db">Avg: <b>${empStats.AvgWorkHours.toFixed(1)}h</b></span>
+            </div>
+        `;
+
+        // Generate grid
+        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sun
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Empty cells for starting offset
+        for(let i=0; i<firstDay; i++) {{
+            container.innerHTML += '<div class="cal-day day-empty"></div>';
+        }}
+
+        // Days
+        for(let d=1; d<=daysInMonth; d++) {{
+            const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const rec = records.find(r => r.Date === dateStr);
+            
+            let className = 'cal-day';
+            if(rec) {{
+                if(rec.IsCompliant) className += ' day-compliant';
+                else if(rec.IsLate || rec.IsEarlyExit) className += ' day-late';
+                else className += ' day-risk';
+            }} else {{
+                className += ' day-empty';
+            }}
+
+            container.innerHTML += `<div class="${className}">${rec ? d : '-'}</div>`;
+        }}
+    }}
+
+    // MODAL LOGIC
+    function openModal(type) {{
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        
+        modal.style.display = 'flex';
+        
+        if(type === 'chronic') {{
+            title.textContent = '🔴 Chronic Late Employees (≥20%)';
+            const data = stats.filter(s => s.ChronicLate);
+            renderTable(data, ['Employee', 'LateDays', 'PresentDays'], ['Employee', 'Late Days', 'Total Days']);
+        }} else if (type === 'under') {{
+            title.textContent = '🟠 Employees Under 8 Hours Avg';
+            const data = stats.filter(s => s.UnderHours);
+            renderTable(data, ['Employee', 'AvgWorkHours', 'PresentDays'], ['Employee', 'Avg Hours', 'Days Present']);
+        }}
+    }}
+    
+    function openEmpDetail(empName) {{
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modal-title');
+        modal.style.display = 'flex';
+        title.textContent = '👤 ' + empName;
+        
+        const records = dailyData.filter(d => d.Employee === empName);
+        renderDetailTable(records);
+    }}
+
+    function closeModal() {{
+        document.getElementById('modal').style.display = 'none';
+    }}
+
+    function renderTable(data, keys, headers) {{
+        const body = document.getElementById('modal-body');
+        let html = '<table class="detail-table"><thead><tr>';
+        headers.forEach(h => html += `<th>${h}</th>`);
+        html += '</tr></thead><tbody>';
+        
+        data.forEach(row => {{
+            html += '<tr>';
+            keys.forEach(k => {{
+                let val = row[k];
+                if(typeof val === 'number' && !Number.isInteger(val)) val = val.toFixed(1);
+                html += `<td>${val}</td>`;
+            }});
+            html += '</tr>';
+        }});
+        html += '</tbody></table>';
+        body.innerHTML = html;
+    }}
+
+    function renderDetailTable(records) {{
+        const body = document.getElementById('modal-body');
+        let html = `<table class="detail-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>Hours</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+            
+        records.forEach(r => {{
+            let tagClass = 'tag-green';
+            if(r.IsLate || r.IsEarlyExit) tagClass = 'tag-orange';
+            if(!r.IsCompliant && !r.IsLate && !r.IsEarlyExit) tagClass = 'tag-red';
+            
+            html += `<tr>
+                <td>${r.Date}</td>
+                <td>${r.FirstIn}</td>
+                <td>${r.LastOut}</td>
+                <td><strong>${r.WorkHours}</strong></td>
+                <td><span class="tag ${tagClass}">${r.Note}</span></td>
+            </tr>`;
+        }});
+        
+        html += '</tbody></table>';
+        body.innerHTML = html;
+    }}
+
+    // Init
+    init();
+
+</script>
+</body>
+</html>
+"""
+
+# MAIN APP LOGIC
+st.markdown("<div class='page-title'>📅 Attendance Report (Interactive)</div>", unsafe_allow_html=True)
+
+uploaded_file = st.file_uploader("Upload Excel Attendance Sheet", type=['xlsx', 'xls', 'csv'])
 
 if uploaded_file is not None:
     try:
         file_name = uploaded_file.name.lower()
-        
         if file_name.endswith('.csv'):
             df_raw = pd.read_csv(uploaded_file)
         elif file_name.endswith('.xls'):
             df_raw = pd.read_excel(uploaded_file, engine='xlrd')
         elif file_name.endswith('.xlsx'):
             df_raw = pd.read_excel(uploaded_file, engine='openpyxl')
-        else:
-            st.error("⚠️ Unsupported file format")
-            st.stop()
-        
+            
         df_daily = process_attendance_simple(df_raw)
         
-        if df_daily is not None and len(df_daily) > 0:
-            st.success(f"✅ Loaded {len(df_daily)} attendance records for {df_daily['Employee'].nunique()} employees")
+        if df_daily is not None and not df_daily.empty:
             
-            # Calculate metrics
+            # 1. PROCESS STATS IN PYTHON
             dates = pd.to_datetime(df_daily['Date'])
-            month_name = dates.dt.strftime('%B %Y').mode()[0]
             total_days_in_month = dates.dt.day.max()
             
             employee_stats = df_daily.groupby('Employee').agg({
@@ -264,243 +677,17 @@ if uploaded_file is not None:
             employee_stats['AvgDeviation'] = (employee_stats['AvgWorkHours'] - REQUIRED_HOURS).round(1)
             employee_stats['TotalRiskDays'] = employee_stats['LateDays'] + employee_stats['EarlyExitDays']
             
-            # KPI CARDS
-            st.markdown("<div class='section-header'>Monthly Management Snapshot</div>", unsafe_allow_html=True)
+            # 2. CONVERT TO JSON FOR JS
+            stats_json = employee_stats.to_json(orient="records")
+            daily_json = df_daily.to_json(orient="records")
             
-            col1, col2, col3, col4 = st.columns(4)
+            # 3. INJECT HTML
+            final_html = HTML_TEMPLATE.replace("{STATS_JSON}", stats_json).replace("{DAILY_JSON}", daily_json)
             
-            with col1:
-                avg_attendance = employee_stats['AttendancePct'].mean()
-                st.markdown(f"""
-                <div style='padding: 20px; border-radius: 10px; text-align: center; color: white; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-height: 120px;'>
-                    <div style='font-size: 13px; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px;'>AVG ATTENDANCE</div>
-                    <div style='font-size: 42px; font-weight: bold; margin: 10px 0;'>{int(avg_attendance)}%</div>
-                </div>
-                """, unsafe_allow_html=True)
+            components.html(final_html, height=800, scrolling=True)
             
-            with col2:
-                avg_work_hrs = employee_stats['AvgWorkHours'].mean()
-                st.markdown(f"""
-                <div style='padding: 20px; border-radius: 10px; text-align: center; color: white; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-height: 120px;'>
-                    <div style='font-size: 13px; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px;'>AVERAGE NET WORK HRS</div>
-                    <div style='font-size: 42px; font-weight: bold; margin: 10px 0;'>{avg_work_hrs:.1f} hrs</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                chronic_late_pct = (employee_stats['ChronicLate'].sum() / len(employee_stats) * 100)
-                
-                # Create HTML card that looks identical to card 1 & 2
-                st.markdown(f"""
-                <div onclick="
-                    const buttons = window.parent.document.querySelectorAll('button');
-                    buttons.forEach(btn => {{
-                        if (btn.innerText === 'CHRONIC_ACTION') {{
-                            btn.click();
-                        }}
-                    }});
-                " style='padding: 20px; border-radius: 10px; text-align: center; color: white; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-height: 120px; cursor: pointer; transition: transform 0.2s;' onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.4)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.3)';">
-                    <div style='font-size: 13px; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px;'>CHRONIC LATE</div>
-                    <div style='font-size: 42px; font-weight: bold; margin: 10px 0;'>{int(chronic_late_pct)}%</div>
-                    <div style='font-size: 10px; opacity: 0.7; margin-top: 5px;'>👆 Click for details</div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Hidden button (using opacity/position instead of display:none for reliability)
-                if st.button("CHRONIC_ACTION", key='chronic_late_btn'):
-                    show_chronic_late_modal(employee_stats)
-                
-                # Hide the button robustly
-                st.markdown("""
-                <script>
-                    const buttons = window.parent.document.querySelectorAll('button');
-                    buttons.forEach(btn => {
-                        if (btn.innerText === 'CHRONIC_ACTION') {
-                            btn.style.opacity = '0';
-                            btn.style.position = 'absolute';
-                            btn.style.zIndex = '-1';
-                            btn.style.height = '0';
-                            btn.style.width = '0';
-                            btn.style.overflow = 'hidden';
-                        }
-                    });
-                </script>
-                """, unsafe_allow_html=True)
-            
-            with col4:
-                under_hours_pct = (employee_stats['UnderHours'].sum() / len(employee_stats) * 100)
-                
-                # Create HTML card that looks identical to card 1 & 2
-                st.markdown(f"""
-                <div onclick="
-                    const buttons = window.parent.document.querySelectorAll('button');
-                    buttons.forEach(btn => {{
-                        if (btn.innerText === 'UNDER_ACTION') {{
-                            btn.click();
-                        }}
-                    }});
-                " style='padding: 20px; border-radius: 10px; text-align: center; color: white; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-height: 120px; cursor: pointer; transition: transform 0.2s;' onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.4)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.3)';">
-                    <div style='font-size: 13px; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px;'>UNDER 8HRS</div>
-                    <div style='font-size: 42px; font-weight: bold; margin: 10px 0;'>{int(under_hours_pct)}%</div>
-                    <div style='font-size: 10px; opacity: 0.7; margin-top: 5px;'>👆 Click for details</div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Hidden button 
-                if st.button("UNDER_ACTION", key='under_hours_btn'):
-                    show_under_hours_modal(employee_stats)
-                
-                # Hide the button robustly
-                st.markdown("""
-                <script>
-                    const buttons = window.parent.document.querySelectorAll('button');
-                    buttons.forEach(btn => {
-                        if (btn.innerText === 'UNDER_ACTION') {
-                            btn.style.opacity = '0';
-                            btn.style.position = 'absolute';
-                            btn.style.zIndex = '-1';
-                            btn.style.height = '0';
-                            btn.style.width = '0';
-                            btn.style.overflow = 'hidden';
-                        }
-                    });
-                </script>
-                """, unsafe_allow_html=True)
-            
-            # MAIN LAYOUT
-            col_left, col_right = st.columns([2.5, 1.5])
-            
-            with col_left:
-                # TOP 5 BEST COMPLIANT
-                st.markdown("<div class='section-header'>Top 5 Best Compliant Employees</div>", unsafe_allow_html=True)
-                st.caption("Click on employee name to see attendance details:")
-                
-                top_compliant = employee_stats.nlargest(5, 'AvgWorkHours')[['Employee', 'AvgWorkHours', 'AvgDeviation']].copy()
-                top_compliant['AvgWorkHours'] = top_compliant['AvgWorkHours'].round(1)
-                
-                for idx, row in top_compliant.iterrows():
-                    col_name, col_hours, col_dev = st.columns([2, 1, 1])
-                    with col_name:
-                        if st.button(f"👤 {row['Employee']}", key=f"best_{idx}", use_container_width=True):
-                            show_employee_details_modal(df_daily, row['Employee'])
-                    with col_hours:
-                        st.metric("Avg Hours", f"{row['AvgWorkHours']:.1f}")
-                    with col_dev:
-                        st.metric("Deviation", f"{row['AvgDeviation']:.1f}")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # TOP 5 RISK EMPLOYEES
-                st.markdown("<div class='section-header'>Top 5 Risk Employees</div>", unsafe_allow_html=True)
-                st.caption("Click on employee name to see attendance details:")
-                
-                top_risk = employee_stats.nlargest(5, 'TotalRiskDays')[['Employee', 'LateDays', 'EarlyExitDays', 'TotalRiskDays']].copy()
-                
-                for idx, row in top_risk.iterrows():
-                    col_name, col_late, col_early, col_total = st.columns([2, 1, 1, 1])
-                    with col_name:
-                        if st.button(f"⚠️ {row['Employee']}", key=f"risk_{idx}", use_container_width=True):
-                            show_employee_details_modal(df_daily, row['Employee'])
-                    with col_late:
-                        st.metric("Late", int(row['LateDays']))
-                    with col_early:
-                        st.metric("Early Exit", int(row['EarlyExitDays']))
-                    with col_total:
-                        st.metric("Total Risk", int(row['TotalRiskDays']))
-            
-            # RIGHT PANEL - EMPLOYEE CALENDAR & STATS
-            with col_right:
-                st.markdown("<div class='section-header'>Employee Calendar & Stats</div>", unsafe_allow_html=True)
-                
-                selected_employee = st.selectbox("Select Employee:", employee_stats['Employee'].unique(), key='emp_select')
-                
-                emp_data = df_daily[df_daily['Employee'] == selected_employee].copy()
-                emp_summary = employee_stats[employee_stats['Employee'] == selected_employee].iloc[0]
-                
-                available_months = pd.to_datetime(emp_data['Date']).dt.to_period('M').unique()
-                if len(available_months) > 0:
-                    selected_month = st.selectbox("Month:", [str(m) for m in available_months], key='month_select')
-                    
-                    st.markdown("**Calendar**")
-                    
-                    year, month = map(int, selected_month.split('-'))
-                    cal = calendar.monthcalendar(year, month)
-                    weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                    
-                    calendar_html = "<div style='margin: 10px 0;'>"
-                    calendar_html += "<div style='display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 5px;'>"
-                    for day in weekdays:
-                        calendar_html += f"<div style='text-align: center; font-weight: bold; color: #95a5a6; padding: 8px; font-size: 11px; text-transform: uppercase;'>{day}</div>"
-                    calendar_html += "</div>"
-                    
-                    calendar_html += "<div class='calendar-grid'>"
-                    emp_data['DayNum'] = pd.to_datetime(emp_data['Date']).dt.day
-                    
-                    for week in cal:
-                        for day in week:
-                            if day == 0:
-                                calendar_html += "<div class='calendar-day day-empty'>-</div>"
-                            else:
-                                day_record = emp_data[emp_data['DayNum'] == day]
-                                
-                                if len(day_record) > 0:
-                                    record = day_record.iloc[0]
-                                    if record['IsCompliant']:
-                                        css_class = 'day-compliant'
-                                    elif record['IsLate'] or record['IsEarlyExit']:
-                                        css_class = 'day-warning'
-                                    else:
-                                        css_class = 'day-risk'
-                                else:
-                                    css_class = 'day-empty'
-                                
-                                calendar_html += f"<div class='calendar-day {css_class}'>{day}</div>"
-                    
-                    calendar_html += "</div></div>"
-                    st.markdown(calendar_html, unsafe_allow_html=True)
-                    
-                    # Month Summary
-                    st.markdown("**Month Summary**")
-                    summary_html = f"""
-                    <div style='background: #2c3e50; padding: 15px; border-radius: 8px; color: white;'>
-                        <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);'>
-                            <span>Present Days</span>
-                            <span style='font-weight: bold;'>{int(emp_summary['PresentDays'])}</span>
-                        </div>
-                        <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);'>
-                            <span>Late Days</span>
-                            <span style='font-weight: bold; color: #f39c12;'>{int(emp_summary['LateDays'])}</span>
-                        </div>
-                        <div style='display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);'>
-                            <span>Early Exit Days</span>
-                            <span style='font-weight: bold; color: #e74c3c;'>{int(emp_summary['EarlyExitDays'])}</span>
-                        </div>
-                        <div style='display: flex; justify-content: space-between; padding: 8px 0;'>
-                            <span>Avg Work Hours</span>
-                            <span style='font-weight: bold; color: #3498db;'>{emp_summary['AvgWorkHours']:.1f} hrs</span>
-                        </div>
-                    </div>
-                    """
-                    st.markdown(summary_html, unsafe_allow_html=True)
-        
         else:
-            st.warning("⚠️ No valid attendance data found.")
+            st.error("Processing failed or no data found.")
             
     except Exception as e:
-        st.error(f"❌ Error: {str(e)}")
-        st.exception(e)
-
-else:
-    st.info("👆 Please upload an Excel attendance sheet to begin")
-    
-    st.markdown("### 📋 File Format Requirements")
-    st.markdown("""
-    - **Employee Name**
-    - **Date/Time** (timestamp)
-    - **Status** (optional)
-    
-    System calculates:
-    - First IN (earliest punch) & Last OUT (latest punch)
-    - Total work time = Last OUT - First IN
-    - Late if after 9:30 AM, Early Exit if < 8 hours
-    """)
+        st.error(f"Error: {e}")
