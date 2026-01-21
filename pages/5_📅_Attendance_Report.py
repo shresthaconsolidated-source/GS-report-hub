@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime, time, timedelta
 import plotly.graph_objects as go
 import plotly.express as px
+import io
 
 # PAGE SETUP
 st.set_page_config(page_title="Attendance Report", page_icon="📅", layout="wide")
@@ -164,13 +165,12 @@ st.markdown("<p style='text-align: center; color: #95a5a6; font-size: 14px; marg
 # BUSINESS RULES (CONSTANTS)
 WORK_START = time(9, 30)
 WORK_END = time(18, 0)
-LATE_THRESHOLD = time(9, 45)
+LATE_GRACE_PERIOD = 15  # Minutes grace before marking late
 FULL_DAY_HOURS = 8
-MAX_LUNCH_MINUTES = 60
+STANDARD_LUNCH_DEDUCTION = 1.0  # Hours to auto-deduct if no lunch detected
 LUNCH_START = time(12, 0)
 LUNCH_END = time(15, 0)
-MAX_BREAK_HOURS = 2.5
-MAX_PUNCHES = 5
+MIN_GAP_FOR_LUNCH = 0.3  # Hours (20 minutes minimum to count as lunch)
 
 # HELPER FUNCTIONS
 def parse_time(time_val):
@@ -214,131 +214,120 @@ def minutes_to_hours_str(minutes):
     return f"{hours} hrs"
 
 def process_attendance_data(df):
-    """Process raw attendance data and calculate all metrics"""
+    """Process raw attendance data using largest-gap lunch detection logic"""
     
-    # Standardize column names (case-insensitive matching)
+    # Standardize column names
     df.columns = df.columns.str.strip()
     
     # Find relevant columns
     name_col = None
     datetime_col = None
-    date_col = None
-    time_col = None
-    status_col = None
     
     for col in df.columns:
         col_lower = col.lower()
-        if 'name' in col_lower and not 'department' in col_lower:
+        if 'name' in col_lower and 'department' not in col_lower:
             name_col = col
-        elif 'date/time' in col_lower or 'datetime' in col_lower:
-            datetime_col = col  # Combined Date/Time column
-        elif 'date' in col_lower and 'time' not in col_lower:
-            date_col = col
-        elif 'time' in col_lower and 'date' not in col_lower:
-            time_col = col
-        elif 'status' in col_lower or 'punch' in col_lower or 'type' in col_lower:
-            status_col = col
+        elif 'date/time' in col_lower or 'datetime' in col_lower or 'date' in col_lower:
+            datetime_col = col
     
-    # Check which format we have
-    if not name_col:
-        st.error("⚠️ Employee Name column not found")
+    if not name_col or not datetime_col:
+        st.error("⚠️ Could not find Name and Date/Time columns")
         return None
     
-    # Handle combined Date/Time column OR separate Date and Time columns
-    if datetime_col:
-        # Parse combined Date/Time column
-        df['DateTime'] = pd.to_datetime(df[datetime_col], errors='coerce')
-        df['Date'] = df['DateTime'].dt.date
-        df['Time'] = df['DateTime'].dt.time
-        df['Employee'] = df[name_col]
-    elif date_col and time_col:
-        # Separate columns
-        df['Date'] = pd.to_datetime(df[date_col], errors='coerce').dt.date
-        df['Time'] = df[time_col].apply(parse_time)
-        df['Employee'] = df[name_col]
-    else:
-        st.error("⚠️ Date/Time columns not found. Please ensure your file has 'Date/Time' or separate 'Date' and 'Time' columns")
-        return None
+    # Parse the combined Date/Time column
+    df['Timestamp'] = pd.to_datetime(df[datetime_col], dayfirst=True, errors='coerce')
+    df = df.dropna(subset=['Timestamp'])
     
-    # Remove invalid rows
-    df = df.dropna(subset=['Employee', 'Date', 'Time'])
+    # Extract date and time
+    df['Date'] = df['Timestamp'].dt.date
+    df['Time'] = df['Timestamp'].dt.time
+    df['Employee'] = df[name_col]
     
-    # Sort by employee, date, and time (CRITICAL for auto-detection)
-    df = df.sort_values(['Employee', 'Date', 'Time'])
+    # Sort by employee and timestamp
+    df = df.sort_values(by=['Employee', 'Timestamp'])
     
-    # Calculate daily metrics
-    daily_metrics = []
+    # Process each employee-date combination
+    results = []
+    grouped = df.groupby(['Employee', 'Date'])
     
-    for (emp, date), group in df.groupby(['Employee', 'Date']):
-        # Get all punches for this employee on this day, sorted by time
-        times = sorted(group['Time'].tolist())
+    for (emp, date), group in grouped:
+        punches = group['Timestamp'].sort_values().tolist()
         
-        if len(times) < 2:
-            continue  # Skip incomplete days (need at least IN and OUT)
+        if len(punches) < 2:
+            continue  # Skip incomplete days
         
-        # AUTO-DETECT In/Out sequence (IGNORE Status column)
-        # Pattern: 1st punch = IN, 2nd = OUT, 3rd = IN, 4th = OUT, etc.
-        check_ins = [times[i] for i in range(len(times)) if i % 2 == 0]  # Even indices = IN
-        check_outs = [times[i] for i in range(len(times)) if i % 2 == 1]  # Odd indices = OUT
+        first_in = punches[0]
+        last_out = punches[-1]
+        punch_count = len(punches)
         
-        # First Check-In and Last Check-Out
-        first_in = times[0]  # First punch is always IN
-        last_out = times[-1] if len(times) % 2 == 0 else times[-2]  # Last OUT (handle odd number of punches)
+        # Calculate Gross Duration (total time between first and last punch)
+        gross_duration_hours = (last_out - first_in).total_seconds() / 3600
         
-        # If odd number of punches, employee forgot to punch out - use last punch as OUT
-        if len(times) % 2 == 1:
-            last_out = times[-1]
+        # Lunch Detection Logic
+        lunch_duration_hours = 0
+        lunch_type = "None"
         
-        # Total Presence (in minutes)
-        total_presence = time_to_minutes(last_out) - time_to_minutes(first_in)
+        if punch_count >= 4:
+            # Find largest gap between consecutive punches
+            gaps = []
+            for i in range(len(punches) - 1):
+                gap_hours = (punches[i+1] - punches[i]).total_seconds() / 3600
+                gaps.append(gap_hours)
+            
+            if gaps:
+                max_gap = max(gaps)
+                if max_gap > MIN_GAP_FOR_LUNCH:  # Only count if > 20 minutes
+                    lunch_duration_hours = max_gap
+                    lunch_type = "Detected"
         
-        # Calculate breaks (time between OUT and next IN)
-        breaks = []
-        for i in range(1, len(times) - 1, 2):  # Start at first OUT (index 1), step by 2
-            if i + 1 < len(times):  # Make sure there's a next IN
-                out_time = times[i]
-                in_time = times[i + 1]
-                break_mins = time_to_minutes(in_time) - time_to_minutes(out_time)
-                if break_mins > 0:  # Only count positive breaks
-                    breaks.append({
-                        'duration': break_mins,
-                        'time': out_time
-                    })
-        
-        total_break = sum(b['duration'] for b in breaks)
-        
-        # Find lunch duration (longest break between 12 PM - 3 PM)
-        lunch_duration = 0
-        for b in breaks:
-            if LUNCH_START <= b['time'] <= LUNCH_END:
-                lunch_duration = max(lunch_duration, b['duration'])
+        elif punch_count > 1 and gross_duration_hours > 5:
+            # Only 2-3 punches but long day - auto-deduct standard lunch
+            lunch_duration_hours = STANDARD_LUNCH_DEDUCTION
+            lunch_type = "Auto-Deducted"
         
         # Net Work Hours
-        net_work = total_presence - total_break
+        net_work_hours = max(0, gross_duration_hours - lunch_duration_hours)
         
-        # Flags
-        is_late = first_in > LATE_THRESHOLD
-        is_not_full_time = net_work < (FULL_DAY_HOURS * 60)
-        excess_lunch = lunch_duration > MAX_LUNCH_MINUTES
-        suspicious = total_break > (MAX_BREAK_HOURS * 60) or len(times) > MAX_PUNCHES
+        # Lateness Check (with grace period)
+        start_threshold = pd.Timestamp(f"{date} {WORK_START.strftime('%H:%M:%S')}")
+        late_threshold = start_threshold + pd.Timedelta(minutes=LATE_GRACE_PERIOD)
         
-        daily_metrics.append({
+        is_late = first_in > late_threshold
+        minutes_late = 0
+        if is_late:
+            minutes_late = (first_in - start_threshold).total_seconds() / 60
+        
+        # Status Determination
+        is_not_full_time = net_work_hours < FULL_DAY_HOURS
+        is_half_day = net_work_hours < 4
+        
+        # Flags for dashboard
+        excess_lunch = lunch_duration_hours > 1.0  # More than 1 hour lunch
+        suspicious = punch_count > 8  # Too many punches
+        
+        results.append({
             'Employee': emp,
             'Date': date,
-            'FirstCheckIn': first_in,
-            'LastCheckOut': last_out,
-            'TotalPresence': total_presence,
-            'BreakTime': total_break,
-            'LunchDuration': lunch_duration,
-            'NetWorkHours': net_work,
+            'Day': first_in.strftime('%A'),
+            'FirstCheckIn': first_in.time(),
+            'LastCheckOut': last_out.time(),
+            'PunchCount': punch_count,
+            'GrossHours': gross_duration_hours,
+            'LunchDuration': lunch_duration_hours * 60,  # Convert to minutes for consistency
+            'LunchType': lunch_type,
+            'NetWorkHours': net_work_hours * 60,  # Convert to minutes
             'Late': is_late,
+            'MinutesLate': int(minutes_late),
             'NotFullTime': is_not_full_time,
+            'HalfDay': is_half_day,
             'ExcessLunch': excess_lunch,
             'Suspicious': suspicious,
-            'PunchCount': len(times)
+            # For backwards compatibility with dashboard
+            'TotalPresence': gross_duration_hours * 60,
+            'BreakTime': lunch_duration_hours * 60
         })
     
-    return pd.DataFrame(daily_metrics)
+    return pd.DataFrame(results)
 
 # FILE UPLOAD
 uploaded_file = st.file_uploader("📤 Upload Excel Attendance Sheet", type=['xlsx', 'xls', 'csv'])
@@ -366,6 +355,37 @@ if uploaded_file is not None:
         
         if df_metrics is not None and len(df_metrics) > 0:
             st.success(f"✅ Loaded {len(df_metrics)} attendance records for {df_metrics['Employee'].nunique()} employees")
+            
+            # Create downloadable Excel file
+            output_buffer = io.BytesIO()
+            
+            # Prepare export dataframe with readable formatting
+            export_df = df_metrics.copy()
+            export_df['Date'] = pd.to_datetime(export_df['Date']).dt.strftime('%Y-%m-%d')
+            export_df['FirstCheckIn'] = export_df['FirstCheckIn'].apply(lambda x: x.strftime('%H:%M:%S'))
+            export_df['LastCheckOut'] = export_df['LastCheckOut'].apply(lambda x: x.strftime('%H:%M:%S'))
+            export_df['GrossHours'] = export_df['GrossHours'].round(2)
+            export_df['NetWorkHours'] = (export_df['NetWorkHours'] / 60).round(2)
+            export_df['LunchDuration'] = (export_df['LunchDuration'] / 60).round(2)
+            
+            # Rename columns for clarity
+            export_df = export_df[['Employee', 'Date', 'Day', 'FirstCheckIn', 'LastCheckOut', 
+                                   'PunchCount', 'GrossHours', 'LunchDuration', 'LunchType', 
+                                   'NetWorkHours', 'Late', 'MinutesLate', 'NotFullTime', 'HalfDay']]
+            export_df.columns = ['Employee', 'Date', 'Day', 'First Punch', 'Last Punch', 
+                                'Punch Count', 'Gross Hours', 'Lunch (Hrs)', 'Lunch Logic', 
+                                'Net Work Hours', 'Is Late?', 'Minutes Late', 'Short Hours', 'Half Day']
+            
+            export_df.to_excel(output_buffer, index=False, engine='xlsxwriter')
+            output_buffer.seek(0)
+            
+            # Download button
+            st.download_button(
+                label="📥 Download Processed Report (Excel)",
+                data=output_buffer,
+                file_name=f"Processed_Attendance_{datetime.now().strftime('%Y%m%d')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
             
             # Calculate aggregated employee metrics
             employee_summary = df_metrics.groupby('Employee').agg({
@@ -451,7 +471,8 @@ if uploaded_file is not None:
                 def color_check_in(val):
                     try:
                         t = datetime.strptime(val, '%I:%M %p').time()
-                        if t > LATE_THRESHOLD:
+                        late_cutoff = time(9, 45)  # 9:30 +  15 minutes grace
+                        if t > late_cutoff:
                             return 'background-color: #e74c3c; color: white; font-weight: bold;'
                         elif t > time(9, 35):
                             return 'background-color: #f39c12; color: white; font-weight: bold;'
