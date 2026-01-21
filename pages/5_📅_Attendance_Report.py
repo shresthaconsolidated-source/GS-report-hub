@@ -842,10 +842,10 @@ Management"""
                         
                         # Generate HTML Table
                         if emp_data.empty:
-                            table_html = "<i>No specific irregularities found in data.</i>"
+                            table_html = "<div style='color:#666; font-style:italic;'>No specific irregularities found in data.</div>"
                         else:
-                            table_html = """<table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd; font-family: sans-serif; font-size: 13px;">
-                                <tr style="background-color: #f2f2f2;">
+                            table_html = """<table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd; font-family: sans-serif; font-size: 13px; color: #333;">
+                                <tr style="background-color: #f2f2f2; color: #333;">
                                     <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
                                     <th style="border: 1px solid #ddd; padding: 8px;">In</th>
                                     <th style="border: 1px solid #ddd; padding: 8px;">Out</th>
@@ -854,7 +854,7 @@ Management"""
                                 </tr>"""
                             for _, row in emp_data.iterrows():
                                 color = "color: #d35400;" if row['IsLate'] else ("color: #c0392b;" if row['IsEarlyExit'] else "")
-                                table_html += f"""<tr>
+                                table_html += f"""<tr style="background-color: #fff;">
                                     <td style="border: 1px solid #ddd; padding: 8px;">{row['Date']}</td>
                                     <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsLate'] else ''}">{row['FirstIn']}</td>
                                     <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsEarlyExit'] else ''}">{row['LastOut']}</td>
@@ -865,16 +865,23 @@ Management"""
                         
                         # Fill Templates
                         subj = email_subject_tmpl.replace("{name}", emp_name)
-                        body = email_body_tmpl.replace("{name}", emp_name).replace("{table}", table_html)
+                        raw_body = email_body_tmpl.replace("{name}", emp_name).replace("{table}", table_html)
                         
                         # Convert newlines to breaks if it looks like plain text
-                        if "<p>" not in body and "<br>" not in body:
-                            body = body.replace("\n", "<br>")
+                        if "<p>" not in raw_body and "<br>" not in raw_body:
+                            raw_body = raw_body.replace("\n", "<br>")
+                        
+                        # Wrap in a clean container for consistent rendering (Fixes dark mode invisibility)
+                        final_body = f"""
+                        <div style="font-family: Arial, sans-serif; color: #333333; background-color: #ffffff; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
+                            {raw_body}
+                        </div>
+                        """
                             
-                        return subj, body
+                        return subj, final_body
 
                     # GENERATE DRAFTS BUTTON
-                    if st.button("📝 Generate Drafts for Review"):
+                    if st.button("📝 Generate Drafts for Review list"):
                         drafts = []
                         for i, row in edited_df.iterrows():
                             emp = row['Employee']
@@ -893,7 +900,7 @@ Management"""
                         for d in drafts:
                             with st.expander(f"Draft for {d['Employee']} (To: {d['Email']})"):
                                 st.markdown(f"**Subject:** {d['Subject']}")
-                                st.components.v1.html(d['Body'], height=300, scrolling=True)
+                                st.components.v1.html(d['Body'], height=400, scrolling=True)
                         
                         st.divider()
                         
@@ -909,12 +916,19 @@ Management"""
                                 
                                 for i, d in enumerate(drafts):
                                     status_area.text(f"Sending to {d['Employee']}...")
-                                    ok, msg = send_email_simple(sender_email, sender_password, d['Email'], d['Subject'], d['Body'])
+                                    # STRIP EMAIL TO REMOVE SPACES
+                                    target = d['Email'].strip()
+                                    if not target:
+                                        st.error(f"Skipping {d['Employee']}: Empty email.")
+                                        fail_count += 1
+                                        continue
+                                        
+                                    ok, msg = send_email_simple(sender_email, sender_password, target, d['Subject'], d['Body'])
                                     if ok:
                                         success_count += 1
                                     else:
                                         fail_count += 1
-                                        st.error(f"Failed to send to {d['Employee']}: {msg}")
+                                        st.error(f"Failed to send to {d['Employee']} ({target}): {msg}")
                                     progress_bar.progress((i + 1) / len(drafts))
                                 
                                 if success_count > 0:
