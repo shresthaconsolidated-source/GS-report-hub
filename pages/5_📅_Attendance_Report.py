@@ -741,8 +741,8 @@ if uploaded_file is not None:
             # NEW: EMAIL ACTION CENTER (Native Streamlit)
             # ---------------------------------------------------------
             st.divider()
-            with st.expander("📧 **Admin Actions: Send Warning Emails**", expanded=True):
-                st.write("Select employees below to send automated warning emails regarding their attendance irregularities.")
+            with st.expander("📧 **Admin Actions: Email Draft & Sender**", expanded=True):
+                st.markdown("### 1. Select Recipients")
                 
                 # Filter useful candidates (Late or Under Hours)
                 risk_candidates = employee_stats[
@@ -751,110 +751,178 @@ if uploaded_file is not None:
                     (employee_stats['TotalRiskDays'] > 0)
                 ].sort_values('TotalRiskDays', ascending=False)
                 
-                if not risk_candidates.empty:
-                    # Multiselect for employees
-                    selected_emps = st.multiselect(
-                        "Select Employees to Email:", 
-                        risk_candidates['Employee'].tolist(),
-                        format_func=lambda x: f"{x} (Late: {risk_candidates[risk_candidates['Employee']==x]['LateDays'].values[0]}, Risk: {risk_candidates[risk_candidates['Employee']==x]['TotalRiskDays'].values[0]})"
-                    )
+                # Multiselect for employees
+                all_emps = employee_stats['Employee'].tolist()
+                
+                # Pre-select risk candidates if any, otherwise empty
+                default_selection = [] # Start empty to force user choice or maybe pre-fill risk ones? User said "Select employees below". Let's stick to manual.
+                
+                selected_emps = st.multiselect(
+                    "Select Employees to Email:", 
+                    all_emps,
+                    default=[],
+                    help="Select employees who need to receive warning emails."
+                )
+                
+                if selected_emps:
+                    st.markdown("---")
+                    col_conf, col_map = st.columns([1.5, 1])
                     
-                    # Credentials Input (Pre-fill if config exists)
+                    with col_conf:
+                        st.markdown("### 2. Configure Content")
+                        st.info("💡 Use `{name}` for employee name and `{table}` for the violation data table.")
+                        
+                        default_subject = "Notice of Attendance Irregularity - {name}"
+                        default_body = """Dear {name},
+
+We have noticed some irregularities in your attendance for this month. 
+Our office hours are from <b>9:30 AM to 5:30 PM</b>.
+
+Below is a summary of dates where you were flagged for Late Entry, Early Exit without sufficient hours, or under-time:
+
+{table}
+
+Please ensure you adhere to the office schedule moving forward.
+If you have valid reasons for these instances, please report to HR.
+
+Regards,
+Management"""
+                        
+                        email_subject_tmpl = st.text_input("Email Subject", value=default_subject)
+                        email_body_tmpl = st.text_area("Email Body (HTML Supported)", value=default_body, height=300)
+                    
+                    with col_map:
+                        st.markdown("### 3. Recipient Emails")
+                        st.caption("Enter the destination email for each selected employee.")
+                        
+                        # Prepare data for editor
+                        # We use session state to persist email entries if selection changes slightly, 
+                        # but for simplicity, we regenerate. Ideally, we persist.
+                        
+                        # Create a base dataframe
+                        map_data = []
+                        for emp in selected_emps:
+                            # Try to find if we already have an email (dummy mock check) or empty
+                            map_data.append({"Employee": emp, "Email Address": ""})
+                        
+                        df_map = pd.DataFrame(map_data)
+                        
+                        edited_df = st.data_editor(
+                            df_map, 
+                            hide_index=True, 
+                            use_container_width=True,
+                            column_config={
+                                "Employee": st.column_config.TextColumn(disabled=True),
+                                "Email Address": st.column_config.TextColumn(required=True, validate="^\\S+@\\S+\\.\\S+$")
+                            },
+                            key="email_map_editor"
+                        )
+                    
+                    st.markdown("---")
+                    st.markdown("### 4. Review & Send")
+                    
+                    # Credentials Input
                     config = load_config()
-                    col1, col2 = st.columns(2)
-                    sender_email = col1.text_input("Sender Email", value=config.get("sender_email", ""))
-                    sender_password = col2.text_input("Sender App Password", value=config.get("sender_password", ""), type="password")
+                    col_creds1, col_creds2 = st.columns(2)
+                    sender_email = col_creds1.text_input("Sender Email", value=config.get("sender_email", ""))
+                    sender_password = col_creds2.text_input("Sender App Password", value=config.get("sender_password", ""), type="password")
                     
-                    if st.button("🚀 Send Warning Emails to Selected"):
-                        if not sender_email or not sender_password:
-                            st.error("Please provide Sender Email and Password.")
-                        elif not selected_emps:
-                            st.warning("Please select at least one employee.")
+                    col_act1, col_act2 = st.columns([1, 1])
+                    
+                    # Helper to generate content
+                    def generate_content_for_emp(emp_name):
+                        # Get irregularities
+                        emp_data = df_daily[
+                            (df_daily['Employee'] == emp_name) & 
+                            (
+                                (df_daily['IsLate']) | 
+                                (df_daily['IsEarlyExit']) | 
+                                (df_daily['WorkHours'] < REQUIRED_HOURS)
+                            )
+                        ]
+                        
+                        # Generate HTML Table
+                        if emp_data.empty:
+                            table_html = "<i>No specific irregularities found in data.</i>"
                         else:
-                            progress_bar = st.progress(0)
-                            status_area = st.empty()
+                            table_html = """<table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd; font-family: sans-serif; font-size: 13px;">
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">In</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Out</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Hrs</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px;">Issue</th>
+                                </tr>"""
+                            for _, row in emp_data.iterrows():
+                                color = "color: #d35400;" if row['IsLate'] else ("color: #c0392b;" if row['IsEarlyExit'] else "")
+                                table_html += f"""<tr>
+                                    <td style="border: 1px solid #ddd; padding: 8px;">{row['Date']}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsLate'] else ''}">{row['FirstIn']}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsEarlyExit'] else ''}">{row['LastOut']}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">{row['WorkHours']}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px;">{row['Note']}</td>
+                                </tr>"""
+                            table_html += "</table>"
+                        
+                        # Fill Templates
+                        subj = email_subject_tmpl.replace("{name}", emp_name)
+                        body = email_body_tmpl.replace("{name}", emp_name).replace("{table}", table_html)
+                        # Convert newlines to breaks if it looks like plain text, but user might paste HTML.
+                        # Simple heuristic: if no <p> or <br> tags, wrap lines.
+                        if "<p>" not in body and "<br>" not in body:
+                            body = body.replace("\n", "<br>")
                             
-                            success_count = 0
+                        return subj, body
+
+                    # PREVIEW BUTTON
+                    if col_act1.button("👁️ Preview First Email"):
+                        first_emp = selected_emps[0]
+                        subj, body = generate_content_for_emp(first_emp)
+                        st.toast(f"Generating preview for {first_emp}...", icon="👁️")
+                        st.markdown(f"**Subject:** {subj}")
+                        st.markdown("**Body Preview:**")
+                        st.components.v1.html(body, height=400, scrolling=True)
+
+                    # SEND BUTTON
+                    if col_act2.button("🚀 Send to All Recipients"):
+                        if not sender_email or not sender_password:
+                            st.error("Missing Sender Credentials.")
+                        else:
+                            # Validate Emails
+                            valid_map = True
+                            for index, row in edited_df.iterrows():
+                                if not row['Email Address'] or "@" not in row['Email Address']:
+                                    st.error(f"Missing or invalid email for {row['Employee']}")
+                                    valid_map = False
                             
-                            for i, emp_name in enumerate(selected_emps):
-                                status_area.text(f"Processing {emp_name}...")
-                                # Get irregularities
-                                emp_data = df_daily[
-                                    (df_daily['Employee'] == emp_name) & 
-                                    (
-                                        (df_daily['IsLate']) | 
-                                        (df_daily['IsEarlyExit']) | 
-                                        (df_daily['WorkHours'] < REQUIRED_HOURS)
-                                    )
-                                ]
+                            if valid_map:
+                                progress_bar = st.progress(0)
+                                status_area = st.empty()
+                                success_count = 0
+                                fail_count = 0
                                 
-                                if emp_data.empty:
-                                    st.warning(f"Skipping {emp_name}: No irregularities found to report.")
-                                    continue
-                                
-                                # Generate HTML Table
-                                table_html = """<table style="border-collapse: collapse; width: 100%; border: 1px solid #ddd;">
-                                    <tr style="background-color: #f2f2f2;">
-                                        <th style="border: 1px solid #ddd; padding: 8px;">Date</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px;">In</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px;">Out</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px;">Hrs</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px;">Issue</th>
-                                    </tr>"""
-                                for _, row in emp_data.iterrows():
-                                    color = "color: orange;" if row['IsLate'] else ("color: red;" if row['IsEarlyExit'] else "")
-                                    table_html += f"""<tr>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">{row['Date']}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsLate'] else ''}">{row['FirstIn']}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; {color if row['IsEarlyExit'] else ''}">{row['LastOut']}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold;">{row['WorkHours']}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">{row['Note']}</td>
-                                    </tr>"""
-                                table_html += "</table>"
-                                
-                                # Email Body
-                                body = f"""
-                                <p>Dear {emp_name},</p>
-                                <p>We have noticed some irregularities in your attendance for this month. 
-                                Our office hours are from <b>9:30 AM to 5:30 PM</b>.</p>
-                                <p>Below is a summary of dates where you were flagged for Late Entry, Early Exit without sufficient hours, or under-time:</p>
-                                {table_html}
-                                <p>Please ensure you adhere to the office schedule moving forward.<br>
-                                If you have valid reasons for these instances, please report to HR.</p>
-                                <br>
-                                <p>Regards,<br>Management</p>
-                                """
-                                
-                                # Send (In a real app, recipient would be emp_name's email. Here we might need a mapping or use a test email)
-                                # For now, taking recipient from config or asking user? 
-                                # User said "allow me to send". 
-                                # I should probably add a mapping or default to the config recipient for testing.
-                                # IMPORTANT: I don't have employee emails. 
-                                # I will use the "recipients" from config as a fallback/test mode, or assume I can't send to real people without a mapping file.
-                                # I'll send to the configured 'notification' email for now as a "BCC / Report" style or ask user.
-                                # Actually, user said "allow me to send... it has my login credentials".
-                                # I will assume for now we send to the test recipient in config (Ashish self) for demo purposes, 
-                                # OR add a caveat.
-                                
-                                # Let's try to send to the email in config['recipients'] but with the subject "Warning for {emp_name}"
-                                target_email = config.get("recipients", "")
-                                if not target_email:
-                                    st.error("No recipient configured in config.json.")
-                                    break
+                                for i, row in edited_df.iterrows():
+                                    emp_name = row['Employee']
+                                    target_email = row['Email Address'] # Use the edited email!
                                     
-                                ok, msg = send_email_simple(sender_email, sender_password, target_email, f"Notice of Attendance Irregularity - {emp_name}", body)
-                                if ok:
-                                    success_count += 1
-                                else:
-                                    st.error(f"Failed to send to {emp_name}: {msg}")
+                                    status_area.text(f"Sending to {emp_name} ({target_email})...")
+                                    
+                                    subj, body = generate_content_for_emp(emp_name)
+                                    
+                                    ok, msg = send_email_simple(sender_email, sender_password, target_email, subj, body)
+                                    
+                                    if ok:
+                                        success_count += 1
+                                    else:
+                                        fail_count += 1
+                                        st.error(f"Failed to send to {emp_name}: {msg}")
+                                    
+                                    progress_bar.progress((i + 1) / len(edited_df))
                                 
-                                progress_bar.progress((i + 1) / len(selected_emps))
-                            
-                            if success_count > 0:
-                                st.success(f"✅ Successfully sent {success_count} emails (delivered to configured test recipient: {config.get('recipients')}).")
-                                st.caption("Note: Since employee email addresses are not in the uploaded file, all emails were sent to your configured recipient address for verification.")
-                else:
-                    st.info("No candidates found with attendance risks.")
+                                if success_count > 0:
+                                    st.success(f"✅ Emails Sent: {success_count}")
+                                if fail_count > 0:
+                                    st.warning(f"❌ Failed: {fail_count}")
             
         else:
             st.error("Processing failed or no data found.")
