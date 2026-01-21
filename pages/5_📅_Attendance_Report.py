@@ -752,12 +752,19 @@ if uploaded_file is not None:
                 all_emps = employee_stats['Employee'].tolist()
                 
                 # Pre-select risk candidates if any, otherwise empty
-                default_selection = [] # Start empty to force user choice or maybe pre-fill risk ones? User said "Select employees below". Let's stick to manual.
+                # default_selection = [] # Start empty to force user choice or maybe pre-fill risk ones? User said "Select employees below". Let's stick to manual.
                 
+                # Callback to clear old drafts if selection changes
+                def clear_drafts():
+                    if "generated_drafts" in st.session_state:
+                        st.session_state.generated_drafts = None
+                        
                 selected_emps = st.multiselect(
-                    "Select Employees to Email:", 
-                    all_emps,
-                    default=[],
+                    "Select Employees to Email:",
+                    options=all_emps, # Using all_emps as risk_employees and formatted_names are not defined
+                    default=[], # Keeping default empty as formatted_names is not defined
+                    on_change=clear_drafts,
+                    key="emp_multiselect",
                     help="Select employees who need to receive warning emails."
                 )
                 
