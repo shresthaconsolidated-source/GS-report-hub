@@ -602,43 +602,90 @@ HTML_TEMPLATE = """
             // Generate Table Rows
             const rows = empData.map(d => `
                 <tr>
-                    <td>${d.Date}</td>
-                    <td style="${d.IsLate ? 'color:orange; font-weight:bold;' : ''}">${d.FirstIn}</td>
-                    <td style="${d.IsEarlyExit ? 'color:red; font-weight:bold;' : ''}">${d.LastOut}</td>
-                    <td>${d.WorkHours}</td>
-                    <td>${d.Note}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${d.Date}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; ${d.IsLate ? 'color:#d35400; font-weight:bold;' : ''}">${d.FirstIn}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; ${d.IsEarlyExit ? 'color:#c0392b; font-weight:bold;' : ''}">${d.LastOut}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${d.WorkHours}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${d.Note}</td>
                 </tr>
             `).join('');
 
-            const emailHtml = `
-            <div class="email-container">
-                <div class="email-subject">Subject: Notice of Attendance Irregularity - ${empName}</div>
-                <pre class="email-body">Dear ${empName},
+            // Clean HTML for Email Client (Outlook/Gmail)
+            // Use inline styles strictly.
+            const cleanDate = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const emailContent = `
+            <div style="font-family: Arial, sans-serif; color: #333333; background-color: #ffffff; padding: 20px; border: 1px solid #eeeeee;">
+                <p><strong>Subject:</strong> Notice of Attendance Irregularity - ${empName}</p>
+                <p>Dear ${empName},</p>
+                <p>We have noticed some irregularities in your attendance for this month. <br>
+                Our office hours are from <strong>9:30 AM to 5:30 PM</strong>.</p>
+                <p>Below is a summary of dates where you were flagged for Late Entry, Early Exit without sufficient hours, or under-time:</p>
+                <table style="border-collapse: collapse; width: 100%; font-size: 13px; border: 1px solid #ddd;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa; color: #333;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">In</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Out</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Hrs</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Issue</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows || '<tr><td colspan=5 style="padding:10px;">No specific issues found (General warning).</td></tr>'}</tbody>
+                </table>
+                <p>Please ensure you adhere to the office schedule moving forward.<br>
+                If you have valid reasons for these instances, please report to HR.</p>
+                <p>Regards,<br>Management</p>
+            </div>`;
 
-We have noticed some irregularities in your attendance for this month. 
-Our office hours are from **9:30 AM to 5:30 PM**.
-
-Below is a summary of dates where you were flagged for Late Entry, Early Exit without sufficient hours, or under-time:
-
-<table class="email-table"><thead><tr><th>Date</th><th>In</th><th>Out</th><th>Hrs</th><th>Issue</th></tr></thead><tbody>${rows || '<tr><td colspan=5>No specific issues found (General compliance warning).</td></tr>'}</tbody></table>
-Please ensure you adhere to the office schedule moving forward.
-If you have valid reasons for these instances, please report to HR.
-
-Regards,
-Management</pre>
-                <button class="copy-btn" onclick="copyToClip(this)">📋 Copy to Clipboard</button>
+            // Display in Modal (dark mode compliant container, but content is light)
+            const displayHtml = `
+            <div class="email-preview-card" style="margin-bottom: 20px; background: #2c3e50; padding: 10px; border-radius: 5px;">
+                <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: #ecf0f1;">Draft for ${empName}</strong>
+                    <button class="copy-btn" onclick="copyEmail(this)">📋 Copy Email</button>
+                    <!-- Hidden textarea for raw copy/paste fallback -->
+                </div>
+                <!-- Render the actual email content inside a white box to simulate email view -->
+                <div class="email-content-render" style="background: white; color: black; padding: 15px; border-radius: 4px;">
+                    ${emailContent}
+                </div>
             </div>`;
             
-            container.insertAdjacentHTML('beforeend', emailHtml);
+            container.insertAdjacentHTML('beforeend', displayHtml);
         });
     }
     
-    function copyToClip(btn) {
-        const text = btn.previousElementSibling.innerText;
-        navigator.clipboard.writeText(text);
-        const original = btn.textContent;
-        btn.textContent = "✅ Copied!";
-        setTimeout(() => btn.textContent = original, 2000);
+    async function copyEmail(btn) {
+        try {
+            const contentDiv = btn.parentElement.nextElementSibling; // The .email-content-render div
+            
+            // Create Blob for rich HTML copy (Works in Gmail/Outlook)
+            const htmlBlob = new Blob([contentDiv.innerHTML], { type: 'text/html' });
+            const textBlob = new Blob([contentDiv.innerText], { type: 'text/plain' });
+            
+            const data = [new ClipboardItem({ 
+                'text/html': htmlBlob, 
+                'text/plain': textBlob 
+            })];
+            
+            await navigator.clipboard.write(data);
+            
+            const originalText = btn.textContent;
+            btn.textContent = "✅ Copied!";
+            
+            // Add flash effect
+            btn.style.backgroundColor = '#27ae60';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = '';
+            }, 2000);
+            
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            // Fallback for non-HTTPS or constrained envs
+             alert("Copy failed (Browser restriction?). Please select the text manually and Copy.");
+        }
     }
 
     // ... (rest of old JS functions: populateEmployeeSelect, renderCalendar, openModal, etc.) ...
