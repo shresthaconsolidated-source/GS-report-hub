@@ -32,13 +32,13 @@ with col1:
 
 with col2:
     st.header("🎯 Lead Report")
-    st.write("Generate weekly lead reports (Coming Soon)")
+    st.write("Generate weekly lead reports and track completed applications.")
     st.write("**Features:**")
     st.markdown("""
-    - Lead tracking
-    - Performance metrics
-    - Automated reporting
-    - Email delivery
+    - Lead tracking & summary
+    - Completed Applications Report
+    - Advanced filtering
+    - Excel downloads
     """)
     if st.button("🎯 Open Lead Report Automator", use_container_width=True, disabled=False):
         st.switch_page("pages/2_🎯_Lead_Report.py")
