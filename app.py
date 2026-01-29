@@ -13,8 +13,8 @@ st.write("Choose a report type to get started:")
 
 st.divider()
 
-# Create five columns for the report options
-col1, col2, col3, col4, col5 = st.columns(5)
+# Create six columns for the report options
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
     st.header("📊 Visa Report")
@@ -83,6 +83,21 @@ with col5:
     """)
     if st.button("📅 Open Attendance Report", use_container_width=True, type="primary"):
         st.switch_page("pages/5_📅_Attendance_Report.py")
+
+with col6:
+    st.header("👥 HR Analytics")
+    st.write("Employee Analytics Dashboard with live Notion data")
+    st.write("**Features:**")
+    st.markdown("""
+    - Live data from Notion
+    - Employee detail popup
+    - Tenure & demographics analytics
+    - Compensation tracking
+    - FX rate conversions
+    - Interactive charts
+    """)
+    if st.button("👥 Open HR Analytics", use_container_width=True, type="primary"):
+        st.switch_page("pages/6_👥_HR_Analytics.py")
 
 st.divider()
 
