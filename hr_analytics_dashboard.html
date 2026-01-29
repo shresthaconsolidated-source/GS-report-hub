@@ -885,18 +885,11 @@
       if (input.value === "Admin123") {
         document.getElementById("login-overlay").style.display = "none";
         document.getElementById("app-content").style.display = "block";
-        sessionStorage.setItem("hr_auth", "true");
       } else {
         err.innerText = "Access Denied";
         input.style.borderColor = "var(--danger)";
         setTimeout(() => input.style.borderColor = "rgba(255,255,255,0.2)", 1000);
       }
-    }
-
-    // Check session on load
-    if (sessionStorage.getItem("hr_auth") === "true") {
-      document.getElementById("login-overlay").style.display = "none";
-      document.getElementById("app-content").style.display = "block";
     }
 
     let employees = [];
