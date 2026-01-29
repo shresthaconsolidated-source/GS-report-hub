@@ -52,9 +52,9 @@ REPORTS = [
         "features": ["Upload CSV/Excel", "3-month expiry filter", "Email Delivery"]
     },
     {
-        "title": "COE Report",
+        "title": "AU COE Report",
         "icon": "🎓",
-        "desc": "Track student COE expiries and generate renewal alerts.",
+        "desc": "Track Australian student COE expiries and generate renewal alerts.",
         "category": "Compliance & Immigration",
         "page": "pages/4_🎓_COE_Report.py",
         "features": ["Upload Data", "< 6 Month Filter", "Email Alerts"]

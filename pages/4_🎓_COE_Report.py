@@ -6,8 +6,8 @@ import json
 import os
 
 # 1. PAGE SETUP
-st.set_page_config(page_title="COE Report Automator", page_icon="🎓", layout="wide")
-st.title("🎓 COE Report Automator")
+st.set_page_config(page_title="AU COE Report Automator", page_icon="🎓", layout="wide")
+st.title("🎓 AU COE Report Automator")
 st.write("Upload your COE data file to generate automated reports.")
 
 # 2. FILE UPLOADER
@@ -438,8 +438,78 @@ tr:nth-child(even) {{background-color: #f9f9f9;}}
                             st.success(f"Email sent successfully to: {recipients_sales}!")
                         except Exception as e:
                             st.error(f"Failed to send email. Error: {e}")
+
+                st.divider()
+
+                # ============================================
+                # REPORT 3: SALES REP NOTIFICATION
+                # ============================================
+                st.header("📢 Report 3: Sales Rep Notification")
+                st.info("Sends ONLY the 'Monthly Targets & Shortfall' table (No financials).")
                 
+                default_recipients_rep = config.get("coe_rep_recipients", "")
+                recipients_rep = st.text_input("Recipients (Sales Reps)", value=default_recipients_rep, key="coe_rep_recipients")
                 
+                subject_key_rep = f"subject_rep_{selected_month_date.strftime('%Y_%m')}"
+                email_subject_rep = st.text_input("Subject", value=f"COE Update - {selected_month_date.strftime('%B %Y')}", key=subject_key_rep)
+                
+                html_body_rep = f"""<html>
+<head>
+<style>
+body {{font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; color: #333;}}
+h2 {{color: #2c3e50; font-size: 16px; margin-top: 20px;}}
+table {{border-collapse: collapse; width: 100%; margin: 15px 0;}}
+th {{background-color: #e74c3c; color: white; padding: 8px; text-align: left; border: 1px solid #ddd;}}
+td {{border: 1px solid #ddd; padding: 6px;}}
+tr:nth-child(even) {{background-color: #f9f9f9;}}
+</style>
+</head>
+<body>
+<p>Hi Team,</p>
+<p>We have received these COEs so far for the month of <strong>{selected_month_date.strftime('%B %Y')}</strong>. Kindly note and verify.</p>
+
+<h2>🎯 Monthly Targets & Shortfall</h2>
+{styled_targets_html}
+
+<p>Best regards,<br>
+<strong>Ashish Shrestha</strong></p>
+</body>
+</html>"""
+
+                with st.expander("📧 Rep Email Preview", expanded=False):
+                    st.components.v1.html(html_body_rep, height=400, scrolling=True)
+
+                if st.button("🚀 Send Rep Report", key="send_rep"):
+                    if not sender_email or not sender_password:
+                        st.error("Please configure email settings in the sidebar")
+                    else:
+                        try:
+                            import smtplib
+                            from email.mime.multipart import MIMEMultipart
+                            from email.mime.text import MIMEText
+                            
+                            msg = MIMEMultipart('alternative')
+                            msg['From'] = sender_email
+                            msg['To'] = recipients_rep
+                            msg['Subject'] = email_subject_rep
+
+                            msg.attach(MIMEText(html_body_rep, 'html'))
+                            
+                            # No attachment needed for Rep Report usually, unless requested. 
+                            # User said "only send the above table". So text only.
+                            
+                            server = smtplib.SMTP('smtp.gmail.com', 587)
+                            server.starttls()
+                            server.login(sender_email, sender_password)
+                            
+                            recipient_list = [r.strip() for r in recipients_rep.split(',')]
+                            server.sendmail(sender_email, recipient_list, msg.as_string())
+                            server.quit()
+
+                            st.success(f"Email sent successfully to: {recipients_rep}!")
+                        except Exception as e:
+                            st.error(f"Failed to send email. Error: {e}")
+
             else:
                 st.warning("No COE records found for current month.")
             
