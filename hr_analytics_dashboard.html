@@ -634,22 +634,22 @@
         <div class="section-title">Employee Tenure Summary</div>
 
         <div class="tenure-grid">
-          <div class="tenure-card">
+          <div class="tenure-card" id="tenureCard0">
             <div class="kpi-title">New Joiners (&lt; 3 months)</div>
             <div class="tenure-value" id="tenure0_3">0</div>
           </div>
 
-          <div class="tenure-card">
+          <div class="tenure-card" id="tenureCard1">
             <div class="kpi-title">3 months – 1 year</div>
             <div class="tenure-value" id="tenure3_12">0</div>
           </div>
 
-          <div class="tenure-card">
+          <div class="tenure-card" id="tenureCard2">
             <div class="kpi-title">1 – 2 years</div>
             <div class="tenure-value" id="tenure12_24">0</div>
           </div>
 
-          <div class="tenure-card">
+          <div class="tenure-card" id="tenureCard3">
             <div class="kpi-title">2+ years</div>
             <div class="tenure-value" id="tenure24p">0</div>
           </div>
@@ -1476,6 +1476,39 @@
         document.getElementById("filterStatus").value = "Probation";
         applyPeopleFilters();
       };
+
+      // Tenure card click handlers - filter employees by tenure
+      document.getElementById("tenureCard0").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        filterByTenure(0, 3);
+      };
+
+      document.getElementById("tenureCard1").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        filterByTenure(3, 12);
+      };
+
+      document.getElementById("tenureCard2").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        filterByTenure(12, 24);
+      };
+
+      document.getElementById("tenureCard3").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        filterByTenure(24, 999);
+      };
+    }
+
+    function filterByTenure(minMonths, maxMonths) {
+      const filtered = employees.filter(e => {
+        const t = calcTenureMonths(e.joining_date);
+        return t != null && t >= minMonths && t < maxMonths;
+      });
+      renderPeopleTable(filtered);
     }
 
     function switchTab(key) {
