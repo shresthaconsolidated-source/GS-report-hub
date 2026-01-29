@@ -634,22 +634,22 @@
         <div class="section-title">Employee Tenure Summary</div>
 
         <div class="tenure-grid">
-          <div class="tenure-card" id="tenureCard0">
+          <div class="tenure-card">
             <div class="kpi-title">New Joiners (&lt; 3 months)</div>
             <div class="tenure-value" id="tenure0_3">0</div>
           </div>
 
-          <div class="tenure-card" id="tenureCard1">
+          <div class="tenure-card">
             <div class="kpi-title">3 months – 1 year</div>
             <div class="tenure-value" id="tenure3_12">0</div>
           </div>
 
-          <div class="tenure-card" id="tenureCard2">
+          <div class="tenure-card">
             <div class="kpi-title">1 – 2 years</div>
             <div class="tenure-value" id="tenure12_24">0</div>
           </div>
 
-          <div class="tenure-card" id="tenureCard3">
+          <div class="tenure-card">
             <div class="kpi-title">2+ years</div>
             <div class="tenure-value" id="tenure24p">0</div>
           </div>
@@ -867,38 +867,6 @@
       } catch (error) {
         console.error("Error loading HR data:", error);
       }
-    }
-
-    async function loadFxRates(currencies) {
-      const rates = { NPR: 1 };
-
-      // Filter out NPR since it's the base currency
-      const nonNPR = currencies.filter(c => c !== "NPR");
-
-      if (nonNPR.length === 0) return rates;
-
-      try {
-        // Fetch live rates from exchangerate API (base NPR)
-        const response = await fetch(`https://api.exchangerate.host/latest?base=NPR&symbols=${nonNPR.join(',')}`);
-        const data = await response.json();
-
-        if (data.success && data.rates) {
-          // Convert rates: we need to invert since we want X currency to NPR
-          for (const [currency, rate] of Object.entries(data.rates)) {
-            rates[currency] = 1 / rate; // Invert to get NPR per unit of currency
-          }
-        } else {
-          // Fallback to default rates if API fails
-          console.warn("FX API failed, using fallback rates");
-          nonNPR.forEach(c => rates[c] = 1);
-        }
-      } catch (error) {
-        console.error("Error fetching FX rates:", error);
-        // Fallback: set all to 1
-        nonNPR.forEach(c => rates[c] = 1);
-      }
-
-      return rates;
     }
 
     function normalizeEmployee(e) {
@@ -1143,10 +1111,7 @@
 
     function renderTenureCards() {
       let t0 = 0, t3 = 0, t12 = 0, t24 = 0;
-      // Only count ACTIVE employees (Active + Probation), exclude Inactive
-      const activeEmployees = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
-
-      activeEmployees.forEach(e => {
+      employees.forEach(e => {
         const t = calcTenureMonths(e.joining_date);
         if (t == null || t < 0) return;
         if (t < 3) t0++;
@@ -1211,11 +1176,9 @@
     }
 
     function renderOverviewCharts() {
-      // Only analyze ACTIVE employees (Active + Probation), exclude Inactive
-      const activeEmployees = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
 
       /* DEPARTMENT */
-      const deptMap = countBy(activeEmployees, e => e.department);
+      const deptMap = countBy(employees, e => e.department);
       if (charts.dept) charts.dept.destroy();
       charts.dept = new Chart(document.getElementById("deptChart"), {
         type: "bar",
@@ -1229,7 +1192,7 @@
       });
 
       /* GENDER */
-      const genderMap = countBy(activeEmployees, e => e.gender);
+      const genderMap = countBy(employees, e => e.gender);
       if (charts.gender) charts.gender.destroy();
       charts.gender = new Chart(document.getElementById("genderChart"), {
         type: "doughnut",
@@ -1242,7 +1205,7 @@
       });
 
       /* AGE */
-      const ageMap = countBy(activeEmployees, ageGroup);
+      const ageMap = countBy(employees, ageGroup);
       if (charts.age) charts.age.destroy();
       charts.age = new Chart(document.getElementById("ageChart"), {
         type: "bar",
@@ -1513,41 +1476,6 @@
         document.getElementById("filterStatus").value = "Probation";
         applyPeopleFilters();
       };
-
-      // Tenure card click handlers - filter employees by tenure
-      document.getElementById("tenureCard0").onclick = () => {
-        switchTab("people");
-        resetFilters();
-        filterByTenure(0, 3);
-      };
-
-      document.getElementById("tenureCard1").onclick = () => {
-        switchTab("people");
-        resetFilters();
-        filterByTenure(3, 12);
-      };
-
-      document.getElementById("tenureCard2").onclick = () => {
-        switchTab("people");
-        resetFilters();
-        filterByTenure(12, 24);
-      };
-
-      document.getElementById("tenureCard3").onclick = () => {
-        switchTab("people");
-        resetFilters();
-        filterByTenure(24, 999);
-      };
-    }
-
-    function filterByTenure(minMonths, maxMonths) {
-      // Only filter ACTIVE employees (Active + Probation)
-      const filtered = employees.filter(e => {
-        const isActive = e.status_clean === "Active" || e.status_clean === "Probation";
-        const t = calcTenureMonths(e.joining_date);
-        return isActive && t != null && t >= minMonths && t < maxMonths;
-      });
-      renderPeopleTable(filtered);
     }
 
     function switchTab(key) {
@@ -1565,35 +1493,11 @@
     }
 
     /* =============================================================
-       INIT
-    ============================================================= */
-
-    async function init() {
-      await loadHRData();
-
-      renderKPIs();
-      renderTenureCards();
-      renderOverviewCharts();
-
-      buildPeopleFilters();
-      setupPeopleFilters();
-      buildPeopleFilters();
-      setupPeopleFilters();
-      applyPeopleFilters();
-
-      setupCompensationFilters();
-      renderCompensation();
-
-      renderTabNav();
-      setupDrilldowns();
-    }
-
-    /* =============================================================
-       COMPENSATION TAB
+       COMPENSATION TAB - ACTIVE EMPLOYEES ONLY
     ============================================================= */
 
     function renderCompensation(filterCountry = "") {
-      // Only calculate for ACTIVE employees (Active + Probation)
+      // ONLY ACTIVE EMPLOYEES (Active + Probation)
       let activeEmployees = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
 
       if (filterCountry) {
@@ -1680,8 +1584,7 @@
       document.getElementById("countryPayrollBody").innerHTML = tableHTML || `<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">No data</td></tr>`;
     }
 
-    function setupCompensationFilters() {
-      // Populate country filter
+    function buildCompCountryFilter() {
       const countries = [...new Set(employees.map(e => e.country))].sort();
       const sel = document.getElementById("compCountry");
       countries.forEach(c => {
@@ -1691,10 +1594,40 @@
         sel.appendChild(opt);
       });
 
-      // Listen for filter changes
       sel.addEventListener("change", () => {
         renderCompensation(sel.value);
       });
+    }
+
+    function setupTabs() {
+      document.querySelectorAll(".tab").forEach(tab => {
+        tab.addEventListener("click", () => {
+          const key = tab.getAttribute("data-tab");
+          switchTab(key);
+        });
+      });
+    }
+
+    /* =============================================================
+       INIT
+    ============================================================= */
+
+    async function init() {
+      await loadHRData();
+
+      renderKPIs();
+      renderTenureCards();
+      renderOverviewCharts();
+
+      buildPeopleFilters();
+      setupPeopleFilters();
+      applyPeopleFilters();
+
+      buildCompCountryFilter();
+      renderCompensation();
+
+      setupTabs();
+      setupDrilldowns();
     }
 
     init();
