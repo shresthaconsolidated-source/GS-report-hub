@@ -1111,7 +1111,10 @@
 
     function renderTenureCards() {
       let t0 = 0, t3 = 0, t12 = 0, t24 = 0;
-      employees.forEach(e => {
+      // Only count ACTIVE employees (Active + Probation), exclude Inactive
+      const activeEmployees = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
+
+      activeEmployees.forEach(e => {
         const t = calcTenureMonths(e.joining_date);
         if (t == null || t < 0) return;
         if (t < 3) t0++;
@@ -1176,9 +1179,11 @@
     }
 
     function renderOverviewCharts() {
+      // Only analyze ACTIVE employees (Active + Probation), exclude Inactive
+      const activeEmployees = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
 
       /* DEPARTMENT */
-      const deptMap = countBy(employees, e => e.department);
+      const deptMap = countBy(activeEmployees, e => e.department);
       if (charts.dept) charts.dept.destroy();
       charts.dept = new Chart(document.getElementById("deptChart"), {
         type: "bar",
@@ -1192,7 +1197,7 @@
       });
 
       /* GENDER */
-      const genderMap = countBy(employees, e => e.gender);
+      const genderMap = countBy(activeEmployees, e => e.gender);
       if (charts.gender) charts.gender.destroy();
       charts.gender = new Chart(document.getElementById("genderChart"), {
         type: "doughnut",
@@ -1205,7 +1210,7 @@
       });
 
       /* AGE */
-      const ageMap = countBy(employees, ageGroup);
+      const ageMap = countBy(activeEmployees, ageGroup);
       if (charts.age) charts.age.destroy();
       charts.age = new Chart(document.getElementById("ageChart"), {
         type: "bar",
@@ -1504,9 +1509,11 @@
     }
 
     function filterByTenure(minMonths, maxMonths) {
+      // Only filter ACTIVE employees (Active + Probation)
       const filtered = employees.filter(e => {
+        const isActive = e.status_clean === "Active" || e.status_clean === "Probation";
         const t = calcTenureMonths(e.joining_date);
-        return t != null && t >= minMonths && t < maxMonths;
+        return isActive && t != null && t >= minMonths && t < maxMonths;
       });
       renderPeopleTable(filtered);
     }
