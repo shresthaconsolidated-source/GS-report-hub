@@ -883,9 +883,8 @@
       try {
         console.log("Fetching official NRB rates for:", nonNPR.join(", "));
 
-        // Fetch rates for each currency from NRB via Cloudflare Worker
-        // TODO: Replace with your deployed worker URL
-        const FX_API_URL = "https://fx-rates.ashishoct34.workers.dev";
+        // Fetch rates from same worker as HR data
+        const FX_API_URL = "https://hr-api.ashishoct34.workers.dev/api/fx";
 
         const promises = nonNPR.map(async (currency) => {
           try {
