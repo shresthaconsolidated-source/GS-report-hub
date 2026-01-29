@@ -1,913 +1,946 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<title>HR Analytics Dashboard – Premium Glass Neon Edition</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <title>HR Analytics Dashboard – Premium Glass Neon Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-
-/* ============================================================
+  <style>
+    /* ============================================================
    PREMIUM GLASS + NEON THEME — ENHANCED VERSION
 ============================================================ */
 
-:root {
-  --bg-main: #050612;
-  --bg-card: rgba(17, 21, 40, 0.72);
-  --bg-glass: rgba(255,255,255,0.06);
-  --bg-hover: rgba(255,255,255,0.12);
-
-  --border-soft: 1px solid rgba(255,255,255,0.09);
-  --border-glow: 1px solid rgba(79,139,255,0.55);
-
-  --text-main: #eef2ff;
-  --text-muted: #9ca3c9;
-
-  --accent: #4f8bff;
-  --accent-glow: 0 0 16px rgba(79,139,255,0.65);
-
-  --success: #3affc3;
-  --warning: #ffce6e;
-  --danger: #ff6b9b;
-
-  --radius-lg: 18px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-
-  --shadow-soft: 0 10px 26px rgba(0,0,0,0.45);
-  --shadow-card: 0 16px 32px rgba(0,0,0,0.6);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: radial-gradient(circle at top left, #10142a 0%, #050612 60%, #000 100%);
-  font-family: Inter, system-ui, sans-serif;
-  color: var(--text-main);
-  min-height: 100vh;
-}
-
-.shell {
-  max-width: 1400px;
-  margin: auto;
-  padding: 28px;
-}
-
-h1 {
-  margin: 0;
-  font-size: 34px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  text-shadow: 0 0 12px rgba(255,255,255,0.14);
-}
-
-.sub-title {
-  margin-top: 6px;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.live-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: rgba(79,139,255,0.12);
-  border: 1px solid rgba(79,139,255,0.45);
-  color: #90b7ff;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-}
-
-.live-dot {
-  width: 10px;
-  height: 10px;
-  background: var(--success);
-  border-radius: 50%;
-  box-shadow: 0 0 12px rgba(58,255,195,0.95);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.1); }
-}
-
-/* TABS --------------------------------------------------*/
-
-.tabs {
-  display: flex;
-  gap: 12px;
-  margin-top: 22px;
-}
-
-.tab {
-  padding: 9px 22px;
-  border-radius: 22px;
-  background: rgba(255,255,255,0.06);
-  color: var(--text-muted);
-  border: var(--border-soft);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  font-size: 13px;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(6px);
-}
-
-.tab:hover {
-  color: #fff;
-  background: rgba(255,255,255,0.12);
-  transform: translateY(-2px);
-}
-
-.tab.active {
-  background: var(--accent);
-  color: white;
-  font-weight: 600;
-  box-shadow: var(--accent-glow);
-  border: none;
-}
-
-.tab-panel {
-  display: none;
-  margin-top: 26px;
-}
-
-.tab-panel.active {
-  display: block;
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* KPI CARDS --------------------------------------------------*/
-
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px,1fr));
-  gap: 18px;
-  margin-top: 24px;
-}
-
-.kpi-card {
-  padding: 22px;
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border: var(--border-soft);
-  box-shadow: var(--shadow-soft);
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--success));
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.kpi-card:hover::before {
-  opacity: 1;
-}
-
-.kpi-card:hover {
-  transform: translateY(-6px);
-  background: rgba(255,255,255,0.10);
-  box-shadow: var(--shadow-card), var(--accent-glow);
-  border: var(--border-glow);
-}
-
-.kpi-title {
-  font-size: 13px;
-  opacity: 0.75;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.kpi-value {
-  font-size: 34px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  background: linear-gradient(135deg, #fff 0%, #90b7ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.kpi-sub {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* SECTION CARDS --------------------------------------------------*/
-
-.section-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(18px);
-  border-radius: var(--radius-lg);
-  border: var(--border-soft);
-  padding: 24px;
-  margin-bottom: 28px;
-  box-shadow: var(--shadow-soft);
-}
-
-.section-title {
-  font-size: 17px;
-  font-weight: 500;
-  margin-bottom: 16px;
-  color: #fff;
-}
-
-canvas {
-  width: 100% !important;
-  height: 260px !important;
-}
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 22px;
-}
-
-.stack-2 {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 22px;
-}
-
-/* TABLES --------------------------------------------------*/
-
-.table-wrap {
-  max-height: 450px;
-  overflow-y: auto;
-  border-radius: var(--radius-md);
-  border: var(--border-soft);
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-thead {
-  background: rgba(255,255,255,0.06);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-th, td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  white-space: nowrap;
-  text-align: left;
-}
-
-tbody tr {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-tbody tr:hover {
-  background: rgba(79,139,255,0.18);
-  transform: scale(1.01);
-}
-
-/* STATUS BADGES ------------------------*/
-
-.status-pill {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  display: inline-block;
-}
-
-.status-active {
-  background: rgba(58,255,195,0.15);
-  color: var(--success);
-  border: 1px solid rgba(58,255,195,0.3);
-}
-
-.status-probation {
-  background: rgba(255,206,110,0.15);
-  color: var(--warning);
-  border: 1px solid rgba(255,206,110,0.3);
-}
-
-.status-inactive {
-  background: rgba(255,107,155,0.20);
-  color: var(--danger);
-  border: 1px solid rgba(255,107,155,0.3);
-}
-
-/* TENURE --------------------------------------------------*/
-
-.tenure-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px,1fr));
-  gap: 18px;
-  margin-top: 16px;
-}
-
-.tenure-card {
-  padding: 20px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.06);
-  border: var(--border-soft);
-  backdrop-filter: blur(14px);
-  text-align: center;
-  box-shadow: var(--shadow-soft);
-  transition: all 0.25s;
-}
-
-.tenure-card:hover {
-  background: rgba(255,255,255,0.10);
-  transform: translateY(-3px);
-}
-
-.tenure-value {
-  font-size: 28px;
-  font-weight: 700;
-  margin-top: 8px;
-  color: var(--accent);
-}
-
-/* EMPLOYEE DETAIL MODAL --------------------------------------------------*/
-
-.modal-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-  animation: fadeInOverlay 0.3s ease;
-}
-
-.modal-overlay.active {
-  display: flex;
-}
-
-@keyframes fadeInOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.modal-content {
-  background: linear-gradient(135deg, rgba(17, 21, 40, 0.95) 0%, rgba(30, 35, 60, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: var(--border-glow);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8), var(--accent-glow);
-  width: 90%;
-  max-width: 700px;
-  max-height: 85vh;
-  overflow-y: auto;
-  padding: 0;
-  position: relative;
-  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.modal-header {
-  padding: 28px 32px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  background: rgba(79,139,255,0.08);
-  position: relative;
-}
-
-.modal-close {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  background: rgba(255,255,255,0.1);
-  border: var(--border-soft);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #fff;
-  font-size: 20px;
-  transition: all 0.25s;
-}
-
-.modal-close:hover {
-  background: rgba(255,107,155,0.3);
-  border-color: var(--danger);
-  transform: rotate(90deg);
-}
-
-.modal-employee-name {
-  font-size: 26px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
-  color: #fff;
-}
-
-.modal-employee-id {
-  font-size: 13px;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-}
-
-.modal-body {
-  padding: 28px 32px;
-}
-
-.detail-section {
-  margin-bottom: 26px;
-}
-
-.detail-section-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--accent);
-  margin-bottom: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  border-bottom: 2px solid rgba(79,139,255,0.3);
-  padding-bottom: 8px;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.detail-item {
-  background: rgba(255,255,255,0.04);
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-
-.detail-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-  margin-bottom: 6px;
-}
-
-.detail-value {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--text-main);
-}
-
-.detail-value.highlight {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* INPUT STYLING --------------------------------------------------*/
-
-input, select {
-  outline: none;
-  transition: all 0.25s;
-}
-
-input:focus, select:focus {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px rgba(79,139,255,0.2);
-}
-
-/* RESPONSIVE --------------------------------------------------*/
-
-@media (max-width: 768px) {
-  .overview-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
-  
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* SCROLLBAR STYLING --------------------------------------------------*/
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(255,255,255,0.05);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(79,139,255,0.5);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(79,139,255,0.7);
-}
-
-</style>
+    :root {
+      --bg-main: #050612;
+      --bg-card: rgba(17, 21, 40, 0.72);
+      --bg-glass: rgba(255, 255, 255, 0.06);
+      --bg-hover: rgba(255, 255, 255, 0.12);
+
+      --border-soft: 1px solid rgba(255, 255, 255, 0.09);
+      --border-glow: 1px solid rgba(79, 139, 255, 0.55);
+
+      --text-main: #eef2ff;
+      --text-muted: #9ca3c9;
+
+      --accent: #4f8bff;
+      --accent-glow: 0 0 16px rgba(79, 139, 255, 0.65);
+
+      --success: #3affc3;
+      --warning: #ffce6e;
+      --danger: #ff6b9b;
+
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+
+      --shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.45);
+      --shadow-card: 0 16px 32px rgba(0, 0, 0, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #10142a 0%, #050612 60%, #000 100%);
+      font-family: Inter, system-ui, sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .shell {
+      max-width: 1400px;
+      margin: auto;
+      padding: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.14);
+    }
+
+    .sub-title {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(79, 139, 255, 0.12);
+      border: 1px solid rgba(79, 139, 255, 0.45);
+      color: #90b7ff;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(58, 255, 195, 0.95);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.6;
+        transform: scale(1.1);
+      }
+    }
+
+    /* TABS --------------------------------------------------*/
+
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .tab {
+      padding: 9px 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: var(--border-soft);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      backdrop-filter: blur(6px);
+    }
+
+    .tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+      box-shadow: var(--accent-glow);
+      border: none;
+    }
+
+    .tab-panel {
+      display: none;
+      margin-top: 26px;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* KPI CARDS --------------------------------------------------*/
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .kpi-card {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .kpi-card:hover::before {
+      opacity: 1;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-6px);
+      background: rgba(255, 255, 255, 0.10);
+      box-shadow: var(--shadow-card), var(--accent-glow);
+      border: var(--border-glow);
+    }
+
+    .kpi-title {
+      font-size: 13px;
+      opacity: 0.75;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .kpi-value {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #fff 0%, #90b7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* SECTION CARDS --------------------------------------------------*/
+
+    .section-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius-lg);
+      border: var(--border-soft);
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 260px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 22px;
+    }
+
+    .stack-2 {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 22px;
+    }
+
+    /* TABLES --------------------------------------------------*/
+
+    .table-wrap {
+      max-height: 450px;
+      overflow-y: auto;
+      border-radius: var(--radius-md);
+      border: var(--border-soft);
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: rgba(255, 255, 255, 0.06);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    tbody tr {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    tbody tr:hover {
+      background: rgba(79, 139, 255, 0.18);
+      transform: scale(1.01);
+    }
+
+    /* STATUS BADGES ------------------------*/
+
+    .status-pill {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    .status-active {
+      background: rgba(58, 255, 195, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(58, 255, 195, 0.3);
+    }
+
+    .status-probation {
+      background: rgba(255, 206, 110, 0.15);
+      color: var(--warning);
+      border: 1px solid rgba(255, 206, 110, 0.3);
+    }
+
+    .status-inactive {
+      background: rgba(255, 107, 155, 0.20);
+      color: var(--danger);
+      border: 1px solid rgba(255, 107, 155, 0.3);
+    }
+
+    /* TENURE --------------------------------------------------*/
+
+    .tenure-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    .tenure-card {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.06);
+      border: var(--border-soft);
+      backdrop-filter: blur(14px);
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+
+    .tenure-card:hover {
+      background: rgba(255, 255, 255, 0.10);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-card), var(--accent-glow);
+      border: var(--border-glow);
+    }
+
+    .tenure-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-top: 8px;
+      color: var(--accent);
+    }
+
+    /* EMPLOYEE DETAIL MODAL --------------------------------------------------*/
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInOverlay 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    @keyframes fadeInOverlay {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(17, 21, 40, 0.95) 0%, rgba(30, 35, 60, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: var(--border-glow);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), var(--accent-glow);
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 0;
+      position: relative;
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      padding: 28px 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(79, 139, 255, 0.08);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border: var(--border-soft);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      font-size: 20px;
+      transition: all 0.25s;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 107, 155, 0.3);
+      border-color: var(--danger);
+      transform: rotate(90deg);
+    }
+
+    .modal-employee-name {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+      color: #fff;
+    }
+
+    .modal-employee-id {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .modal-body {
+      padding: 28px 32px;
+    }
+
+    .detail-section {
+      margin-bottom: 26px;
+    }
+
+    .detail-section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-bottom: 2px solid rgba(79, 139, 255, 0.3);
+      padding-bottom: 8px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .detail-item {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .detail-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .detail-value.highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* INPUT STYLING --------------------------------------------------*/
+
+    input,
+    select {
+      outline: none;
+      transition: all 0.25s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 3px rgba(79, 139, 255, 0.2);
+    }
+
+    /* RESPONSIVE --------------------------------------------------*/
+
+    @media (max-width: 768px) {
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        width: 95%;
+        max-height: 90vh;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* SCROLLBAR STYLING --------------------------------------------------*/
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(79, 139, 255, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(79, 139, 255, 0.7);
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="shell">
+  <div class="shell">
 
-  <h1>HR Analytics Dashboard</h1>
-  <div class="sub-title">Premium Glass Neon Edition · Live Notion + Cloudflare + FX</div>
+    <h1>HR Analytics Dashboard</h1>
+    <div class="sub-title">Premium Glass Neon Edition · Live Notion + Cloudflare + FX</div>
 
-  <div class="live-pill">
-    <div class="live-dot"></div>
-    LIVE DATA FEED · FX SYNC
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="overview">Overview</div>
-    <div class="tab" data-tab="people">People</div>
-    <div class="tab" data-tab="compensation">Compensation</div>
-  </div>
-
-  <!-- CLEAN KPI GRID -->
-  <div class="kpi-grid">
-    <div class="kpi-card" id="kpiTotalCard">
-      <div class="kpi-title">Total Employees</div>
-      <div class="kpi-value" id="kpiTotal">0</div>
-      <div class="kpi-sub">All Staff</div>
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      LIVE DATA FEED · FX SYNC
     </div>
 
-    <div class="kpi-card" id="kpiActiveCard">
-      <div class="kpi-title">Active Employees</div>
-      <div class="kpi-value" id="kpiActive">0</div>
-      <div class="kpi-sub">Including probation</div>
+    <div class="tabs">
+      <div class="tab active" data-tab="overview">Overview</div>
+      <div class="tab" data-tab="people">People</div>
+      <div class="tab" data-tab="compensation">Compensation</div>
     </div>
 
-    <div class="kpi-card" id="kpiInactiveCard">
-      <div class="kpi-title">Inactive Employees</div>
-      <div class="kpi-value" id="kpiInactive">0</div>
-      <div class="kpi-sub">Attrition: <span id="kpiAttr">0%</span></div>
-    </div>
-
-    <div class="kpi-card" id="kpiProbCard">
-      <div class="kpi-title">On Probation</div>
-      <div class="kpi-value" id="kpiProbation">0</div>
-      <div class="kpi-sub">Ending soon</div>
-    </div>
-  </div>
-
-  <!-- ================= OVERVIEW ================= -->
-  <div class="tab-panel active" id="tab-overview">
-
-    <div class="section-card">
-      <div class="section-title">Employee Tenure Summary</div>
-
-      <div class="tenure-grid">
-        <div class="tenure-card">
-          <div class="kpi-title">New Joiners (&lt; 3 months)</div>
-          <div class="tenure-value" id="tenure0_3">0</div>
-        </div>
-
-        <div class="tenure-card">
-          <div class="kpi-title">3 months – 1 year</div>
-          <div class="tenure-value" id="tenure3_12">0</div>
-        </div>
-
-        <div class="tenure-card">
-          <div class="kpi-title">1 – 2 years</div>
-          <div class="tenure-value" id="tenure12_24">0</div>
-        </div>
-
-        <div class="tenure-card">
-          <div class="kpi-title">2+ years</div>
-          <div class="tenure-value" id="tenure24p">0</div>
-        </div>
+    <!-- CLEAN KPI GRID -->
+    <div class="kpi-grid">
+      <div class="kpi-card" id="kpiTotalCard">
+        <div class="kpi-title">Total Employees</div>
+        <div class="kpi-value" id="kpiTotal">0</div>
+        <div class="kpi-sub">All Staff</div>
       </div>
 
-      <div style="margin-top:28px;">
-        <canvas id="tenureChart"></canvas>
+      <div class="kpi-card" id="kpiActiveCard">
+        <div class="kpi-title">Active Employees</div>
+        <div class="kpi-value" id="kpiActive">0</div>
+        <div class="kpi-sub">Including probation</div>
+      </div>
+
+      <div class="kpi-card" id="kpiInactiveCard">
+        <div class="kpi-title">Inactive Employees</div>
+        <div class="kpi-value" id="kpiInactive">0</div>
+        <div class="kpi-sub">Attrition: <span id="kpiAttr">0%</span></div>
+      </div>
+
+      <div class="kpi-card" id="kpiProbCard">
+        <div class="kpi-title">On Probation</div>
+        <div class="kpi-value" id="kpiProbation">0</div>
+        <div class="kpi-sub">Ending soon</div>
       </div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">Workforce Composition</div>
+    <!-- ================= OVERVIEW ================= -->
+    <div class="tab-panel active" id="tab-overview">
 
-      <div class="overview-grid">
-        <div>
-          <div class="kpi-title">Department Distribution</div>
-          <canvas id="deptChart"></canvas>
-        </div>
+      <div class="section-card">
+        <div class="section-title">Employee Tenure Summary</div>
 
-        <div class="stack-2">
-          <div>
-            <div class="kpi-title">Gender Split</div>
-            <canvas id="genderChart"></canvas>
+        <div class="tenure-grid">
+          <div class="tenure-card">
+            <div class="kpi-title">New Joiners (&lt; 3 months)</div>
+            <div class="tenure-value" id="tenure0_3">0</div>
           </div>
-          <div>
-            <div class="kpi-title">Age Groups</div>
-            <canvas id="ageChart"></canvas>
+
+          <div class="tenure-card">
+            <div class="kpi-title">3 months – 1 year</div>
+            <div class="tenure-value" id="tenure3_12">0</div>
+          </div>
+
+          <div class="tenure-card">
+            <div class="kpi-title">1 – 2 years</div>
+            <div class="tenure-value" id="tenure12_24">0</div>
+          </div>
+
+          <div class="tenure-card">
+            <div class="kpi-title">2+ years</div>
+            <div class="tenure-value" id="tenure24p">0</div>
           </div>
         </div>
+
+        <div style="margin-top:28px;">
+          <canvas id="tenureChart"></canvas>
+        </div>
       </div>
+
+      <div class="section-card">
+        <div class="section-title">Workforce Composition</div>
+
+        <div class="overview-grid">
+          <div>
+            <div class="kpi-title">Department Distribution</div>
+            <canvas id="deptChart"></canvas>
+          </div>
+
+          <div class="stack-2">
+            <div>
+              <div class="kpi-title">Gender Split</div>
+              <canvas id="genderChart"></canvas>
+            </div>
+            <div>
+              <div class="kpi-title">Age Groups</div>
+              <canvas id="ageChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title">Probation Ending Within 30 Days</div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Probation End</th>
+                <th>Days Left</th>
+              </tr>
+            </thead>
+            <tbody id="probationTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
-    <div class="section-card">
-      <div class="section-title">Probation Ending Within 30 Days</div>
+    <!-- ================= PEOPLE ================= -->
+    <div class="tab-panel" id="tab-people">
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Probation End</th>
-              <th>Days Left</th>
-            </tr>
-          </thead>
-          <tbody id="probationTableBody"></tbody>
-        </table>
-      </div>
-    </div>
+      <div class="section-card">
+        <div class="section-title">Employee Master List</div>
 
-  </div>
-
-  <!-- ================= PEOPLE ================= -->
-  <div class="tab-panel" id="tab-people">
-
-    <div class="section-card">
-      <div class="section-title">Employee Master List</div>
-
-      <div style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
-        <input id="searchInput" placeholder="Search by name, ID, designation..."
-        style="flex:1; padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+        <div style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+          <input id="searchInput" placeholder="Search by name, ID, designation..." style="flex:1; padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white; font-size:13px;">
 
-        <select id="filterStatus" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+          <select id="filterStatus" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-          <option value="">Status: All</option>
-          <option value="Active">Active</option>
-          <option value="Probation">Probation</option>
-          <option value="Inactive">Inactive</option>
-        </select>
+            <option value="">Status: All</option>
+            <option value="Active">Active</option>
+            <option value="Probation">Probation</option>
+            <option value="Inactive">Inactive</option>
+          </select>
 
-        <select id="filterDept"
-        style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+          <select id="filterDept" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-          <option value="">Department: All</option>
-        </select>
+            <option value="">Department: All</option>
+          </select>
 
-        <select id="filterCountry"
-        style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+          <select id="filterCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-          <option value="">Country: All</option>
-        </select>
+            <option value="">Country: All</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Department</th>
+                <th>Country</th>
+                <th>Status</th>
+                <th>Joining</th>
+                <th>Probation End</th>
+                <th>Salary</th>
+                <th>Currency</th>
+              </tr>
+            </thead>
+            <tbody id="employeeTableBody"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Name</th><th>Designation</th><th>Department</th>
-              <th>Country</th><th>Status</th><th>Joining</th><th>Probation End</th>
-              <th>Salary</th><th>Currency</th>
-            </tr>
-          </thead>
-          <tbody id="employeeTableBody"></tbody>
-        </table>
-      </div>
     </div>
 
-  </div>
+    <!-- ================= COMPENSATION ================= -->
+    <div class="tab-panel" id="tab-compensation">
 
-  <!-- ================= COMPENSATION ================= -->
-  <div class="tab-panel" id="tab-compensation">
+      <div class="section-card">
 
-    <div class="section-card">
+        <div class="section-title">Compensation & Payroll Summary</div>
 
-      <div class="section-title">Compensation & Payroll Summary</div>
-
-      <div style="margin-bottom:20px;">
-        <select id="compCountry"
-        style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+        <div style="margin-bottom:20px;">
+          <select id="compCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-          <option value="">Country: All</option>
-        </select>
-      </div>
+            <option value="">Country: All</option>
+          </select>
+        </div>
 
-      <div class="overview-grid" style="grid-template-columns:1.2fr 1fr; gap:26px;">
+        <div class="overview-grid" style="grid-template-columns:1.2fr 1fr; gap:26px;">
 
-        <div>
+          <div>
+
+            <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
+          border:var(--border-soft); box-shadow:var(--shadow-soft);">
+              <h3 style="margin:0; font-size:18px;">Total Payroll (NPR)</h3>
+              <div id="totalPayrollNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
+            </div>
+
+            <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+              <h3 style="margin:0; font-size:18px;">Average Salary (NPR)</h3>
+              <div id="avgSalaryNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
+            </div>
+
+            <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+              <h3 style="margin:0; font-size:18px;">Top Paying Country</h3>
+              <div id="topCountryName" style="font-size:22px; margin-top:4px;">–</div>
+              <div id="topCountryVal" style="font-size:14px; margin-top:4px; color:var(--text-muted);"></div>
+            </div>
+
+            <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+              <h3 style="margin:0; font-size:18px;">Currency-wise Payroll</h3>
+              <div id="currencyCards" style="margin-top:14px;"></div>
+            </div>
+
+          </div>
 
           <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
-          border:var(--border-soft); box-shadow:var(--shadow-soft);">
-            <h3 style="margin:0; font-size:18px;">Total Payroll (NPR)</h3>
-            <div id="totalPayrollNPR"
-            style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
-          </div>
-
-          <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-            <h3 style="margin:0; font-size:18px;">Average Salary (NPR)</h3>
-            <div id="avgSalaryNPR"
-            style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
-          </div>
-
-          <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-            <h3 style="margin:0; font-size:18px;">Top Paying Country</h3>
-            <div id="topCountryName" style="font-size:22px; margin-top:4px;">–</div>
-            <div id="topCountryVal"
-            style="font-size:14px; margin-top:4px; color:var(--text-muted);"></div>
-          </div>
-
-          <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-            <h3 style="margin:0; font-size:18px;">Currency-wise Payroll</h3>
-            <div id="currencyCards" style="margin-top:14px;"></div>
-          </div>
-
-        </div>
-
-        <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); box-shadow:var(--shadow-soft);">
-          <h3 style="margin:0; font-size:18px;">Country-wise Payroll (NPR)</h3>
+            <h3 style="margin:0; font-size:18px;">Country-wise Payroll (NPR)</h3>
 
-          <div class="table-wrap" style="margin-top:14px; max-height:390px;">
-            <table>
-              <thead>
-                <tr><th>Country</th><th>Employees</th><th>Total Payroll</th></tr>
-              </thead>
-              <tbody id="countryPayrollBody"></tbody>
-            </table>
+            <div class="table-wrap" style="margin-top:14px; max-height:390px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Country</th>
+                    <th>Employees</th>
+                    <th>Total Payroll</th>
+                  </tr>
+                </thead>
+                <tbody id="countryPayrollBody"></tbody>
+              </table>
+            </div>
           </div>
-        </div>
 
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- EMPLOYEE DETAIL MODAL -->
+  <div class="modal-overlay" id="employeeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-close" onclick="closeEmployeeModal()">&times;</div>
+        <h2 class="modal-employee-name" id="modalName">Employee Name</h2>
+        <div class="modal-employee-id" id="modalId">ID: NP001</div>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content will be dynamically generated -->
       </div>
     </div>
   </div>
 
-</div>
-
-<!-- EMPLOYEE DETAIL MODAL -->
-<div class="modal-overlay" id="employeeModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-close" onclick="closeEmployeeModal()">&times;</div>
-      <h2 class="modal-employee-name" id="modalName">Employee Name</h2>
-      <div class="modal-employee-id" id="modalId">ID: NP001</div>
-    </div>
-    <div class="modal-body" id="modalBody">
-      <!-- Content will be dynamically generated -->
-    </div>
-  </div>
-</div>
-
-<!-- =======================================================
+  <!-- =======================================================
      JAVASCRIPT — ENHANCED WITH EMPLOYEE MODAL
 ======================================================== -->
 
-<script>
+  <script>
 
-let employees = [];
-let fxRates = { NPR: 1 };
-let charts = {};
+    let employees = [];
+    let fxRates = { NPR: 1 };
+    let charts = {};
 
-const API_URL = "https://hr-api.ashishoct34.workers.dev/api/hr";
+    const API_URL = "https://hr-api.ashishoct34.workers.dev/api/hr";
 
-/* =============================================================
-   LOAD HR DATA
-============================================================= */
+    /* =============================================================
+       LOAD HR DATA
+    ============================================================= */
 
-async function loadHRData() {
-  try {
-    const res = await fetch(API_URL);
-    const json = await res.json();
-    employees = json.employees.map(e => normalizeEmployee(e));
+    async function loadHRData() {
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        employees = json.employees.map(e => normalizeEmployee(e));
 
-    const curList = [...new Set(employees.map(e => e.salary_currency).filter(Boolean))];
-    fxRates = await loadFxRates(curList);
-  } catch (error) {
-    console.error("Error loading HR data:", error);
-  }
-}
-
-function normalizeEmployee(e) {
-  const currency = (e.salary_fx || e.salary_currency || "NPR").toUpperCase();
-  let salary = e.last_salary || e.salary_npr || 0;
-
-  return {
-    id: e.id || "",
-    name: e.name || "",
-    department: e.department || "Unknown",
-    designation: e.designation || "",
-    gender: e.gender || "Unknown",
-    education: e.education || "",
-    country: e.country || "",
-    joining_date: e.joining_date || null,
-    probation_end: e.probation_end || null,
-    dob: e.dob || null,
-    status_clean: e.status || "Inactive",
-    salary_currency: currency,
-    base_salary: Number(salary) || 0,
-    // Additional fields for modal
-    reporting_manager: e.reporting_manager || "",
-    email: e.email || "",
-    phone: e.phone || "",
-    bank_account: e.bank_account || "",
-    pan: e.pan || "",
-    remarks: e.remarks || "",
-    years_of_experience: e.years_of_experience || "",
-    citizenship: e.citizenship || "",
-    last_working_date: e.last_working_date || null
-  };
-}
-
-/* =============================================================
-   FX LOADER
-============================================================= */
-
-async function loadFxRates(list) {
-  const map = { NPR: 1 };
-  for (const code of list) {
-    if (code === "NPR") { map["NPR"] = 1; continue; }
-    try {
-      const res = await fetch(`https://api.exchangerate.host/latest?base=${code}&symbols=NPR`);
-      const data = await res.json();
-      map[code] = data.rates.NPR;
-    } catch {
-      map[code] = 1;
+        const curList = [...new Set(employees.map(e => e.salary_currency).filter(Boolean))];
+        fxRates = await loadFxRates(curList);
+      } catch (error) {
+        console.error("Error loading HR data:", error);
+      }
     }
-  }
-  return map;
-}
 
-/* =============================================================
-   UTIL
-============================================================= */
+    function normalizeEmployee(e) {
+      const currency = (e.salary_fx || e.salary_currency || "NPR").toUpperCase();
+      let salary = e.last_salary || e.salary_npr || 0;
 
-function parseDate(d) { if (!d) return null; const x = new Date(d); return isNaN(x)?null:x; }
-function formatDate(d) { return d ? new Date(d).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "–"; }
-function formatNumber(n) { return Number(n).toLocaleString("en-IN"); }
+      return {
+        id: e.id || "",
+        name: e.name || "",
+        department: e.department || "Unknown",
+        designation: e.designation || "",
+        gender: e.gender || "Unknown",
+        education: e.education || "",
+        country: e.country || "",
+        joining_date: e.joining_date || null,
+        probation_end: e.probation_end || null,
+        dob: e.dob || null,
+        status_clean: e.status || "Inactive",
+        salary_currency: currency,
+        base_salary: Number(salary) || 0,
+        // Additional fields for modal
+        reporting_manager: e.reporting_manager || "",
+        email: e.email || "",
+        phone: e.phone || "",
+        bank_account: e.bank_account || "",
+        pan: e.pan || "",
+        remarks: e.remarks || "",
+        years_of_experience: e.years_of_experience || "",
+        citizenship: e.citizenship || "",
+        last_working_date: e.last_working_date || null
+      };
+    }
 
-function salaryNPR(e) {
-  return e.base_salary * (fxRates[e.salary_currency] || 1);
-}
+    /* =============================================================
+       FX LOADER
+    ============================================================= */
 
-/* =============================================================
-   EMPLOYEE DETAIL MODAL
-============================================================= */
+    async function loadFxRates(list) {
+      const map = { NPR: 1 };
+      for (const code of list) {
+        if (code === "NPR") { map["NPR"] = 1; continue; }
+        try {
+          const res = await fetch(`https://api.exchangerate.host/latest?base=${code}&symbols=NPR`);
+          const data = await res.json();
+          map[code] = data.rates.NPR;
+        } catch {
+          map[code] = 1;
+        }
+      }
+      return map;
+    }
 
-function showEmployeeModal(employee) {
-  document.getElementById("modalName").innerText = employee.name;
-  document.getElementById("modalId").innerText = `Employee ID: ${employee.id}`;
-  
-  const modalBody = document.getElementById("modalBody");
-  modalBody.innerHTML = `
+    /* =============================================================
+       UTIL
+    ============================================================= */
+
+    function parseDate(d) { if (!d) return null; const x = new Date(d); return isNaN(x) ? null : x; }
+    function formatDate(d) { return d ? new Date(d).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "–"; }
+    function formatNumber(n) { return Number(n).toLocaleString("en-IN"); }
+
+    function salaryNPR(e) {
+      return e.base_salary * (fxRates[e.salary_currency] || 1);
+    }
+
+    /* =============================================================
+       EMPLOYEE DETAIL MODAL
+    ============================================================= */
+
+    function showEmployeeModal(employee) {
+      document.getElementById("modalName").innerText = employee.name;
+      document.getElementById("modalId").innerText = `Employee ID: ${employee.id}`;
+
+      const modalBody = document.getElementById("modalBody");
+      modalBody.innerHTML = `
     <div class="detail-section">
       <div class="detail-section-title">Personal Information</div>
       <div class="detail-grid">
@@ -1023,274 +1056,274 @@ function showEmployeeModal(employee) {
     </div>
     ` : ''}
   `;
-  
-  document.getElementById("employeeModal").classList.add("active");
-  document.body.style.overflow = "hidden";
-}
 
-function closeEmployeeModal() {
-  document.getElementById("employeeModal").classList.remove("active");
-  document.body.style.overflow = "auto";
-}
+      document.getElementById("employeeModal").classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
 
-// Close modal on overlay click
-document.getElementById("employeeModal").addEventListener("click", function(e) {
-  if (e.target === this) {
-    closeEmployeeModal();
-  }
-});
+    function closeEmployeeModal() {
+      document.getElementById("employeeModal").classList.remove("active");
+      document.body.style.overflow = "auto";
+    }
 
-// Close modal on ESC key
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") {
-    closeEmployeeModal();
-  }
-});
-
-/* =============================================================
-   KPIs
-============================================================= */
-
-function renderKPIs() {
-  const active = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
-  const inactive = employees.filter(e => e.status_clean === "Inactive");
-  const prob = employees.filter(e => e.status_clean === "Probation");
-
-  document.getElementById("kpiTotal").innerText = employees.length;
-  document.getElementById("kpiActive").innerText = active.length;
-  document.getElementById("kpiInactive").innerText = inactive.length;
-  document.getElementById("kpiProbation").innerText = prob.length;
-
-  const attr = employees.length ? (inactive.length / employees.length) * 100 : 0;
-  document.getElementById("kpiAttr").innerText = attr.toFixed(1) + "%";
-}
-
-/* =============================================================
-   TENURE LOGIC
-============================================================= */
-
-function calcTenureMonths(joinDateStr) {
-  const join = parseDate(joinDateStr);
-  if (!join) return null;
-  const now = new Date();
-  return (now.getFullYear() - join.getFullYear()) * 12 + (now.getMonth() - join.getMonth());
-}
-
-function renderTenureCards() {
-  let t0=0,t3=0,t12=0,t24=0;
-  employees.forEach(e => {
-    const t = calcTenureMonths(e.joining_date);
-    if (t == null || t<0) return;
-    if (t < 3) t0++;
-    else if (t < 12) t3++;
-    else if (t < 24) t12++;
-    else t24++;
-  });
-
-  document.getElementById("tenure0_3").innerText = t0;
-  document.getElementById("tenure3_12").innerText = t3;
-  document.getElementById("tenure12_24").innerText = t12;
-  document.getElementById("tenure24p").innerText = t24;
-
-  renderTenureChart([t0,t3,t12,t24]);
-}
-
-function renderTenureChart(vals) {
-  if (charts.tenure) charts.tenure.destroy();
-  charts.tenure = new Chart(document.getElementById("tenureChart"), {
-    type: "bar",
-    data: {
-      labels:["<3m","3m–1y","1–2y","2+y"],
-      datasets:[{ data: vals, backgroundColor:["#4f8bff","#7f9cff","#ff6b9b","#ffce6e"], borderWidth:0 }]
-    },
-    options:{
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:"#ddd"},grid:{display:false}},
-        y:{ticks:{color:"#ddd"},grid:{color:"rgba(255,255,255,0.08)"}}
+    // Close modal on overlay click
+    document.getElementById("employeeModal").addEventListener("click", function (e) {
+      if (e.target === this) {
+        closeEmployeeModal();
       }
+    });
+
+    // Close modal on ESC key
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closeEmployeeModal();
+      }
+    });
+
+    /* =============================================================
+       KPIs
+    ============================================================= */
+
+    function renderKPIs() {
+      const active = employees.filter(e => e.status_clean === "Active" || e.status_clean === "Probation");
+      const inactive = employees.filter(e => e.status_clean === "Inactive");
+      const prob = employees.filter(e => e.status_clean === "Probation");
+
+      document.getElementById("kpiTotal").innerText = employees.length;
+      document.getElementById("kpiActive").innerText = active.length;
+      document.getElementById("kpiInactive").innerText = inactive.length;
+      document.getElementById("kpiProbation").innerText = prob.length;
+
+      const attr = employees.length ? (inactive.length / employees.length) * 100 : 0;
+      document.getElementById("kpiAttr").innerText = attr.toFixed(1) + "%";
     }
-  });
-}
 
-/* =============================================================
-   COMPOSITION CHARTS
-============================================================= */
+    /* =============================================================
+       TENURE LOGIC
+    ============================================================= */
 
-function countBy(list, fn) {
-  const map={};
-  list.forEach(e=>{
-    const k = fn(e);
-    map[k] = (map[k]||0)+1;
-  });
-  return map;
-}
-
-function ageGroup(e) {
-  const d = parseDate(e.dob);
-  if (!d) return "Unknown";
-  const now = new Date();
-  let age = now.getFullYear()-d.getFullYear();
-  const m = now.getMonth()-d.getMonth();
-  if (m<0 || (m===0 && now.getDate()<d.getDate())) age--;
-  if (age < 25) return "Under 25";
-  if (age < 35) return "25–34";
-  if (age < 45) return "35–44";
-  if (age < 55) return "45–54";
-  return "55+";
-}
-
-function renderOverviewCharts() {
-
-  /* DEPARTMENT */
-  const deptMap = countBy(employees, e=>e.department);
-  if (charts.dept) charts.dept.destroy();
-  charts.dept = new Chart(document.getElementById("deptChart"), {
-    type:"bar",
-    data:{labels:Object.keys(deptMap),datasets:[{data:Object.values(deptMap),backgroundColor:"#4f8bff"}]},
-    options:{
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:"#ccc"},grid:{display:false}},y:{ticks:{color:"#ccc"},grid:{color:"rgba(255,255,255,0.08)"}}}
+    function calcTenureMonths(joinDateStr) {
+      const join = parseDate(joinDateStr);
+      if (!join) return null;
+      const now = new Date();
+      return (now.getFullYear() - join.getFullYear()) * 12 + (now.getMonth() - join.getMonth());
     }
-  });
 
-  /* GENDER */
-  const genderMap = countBy(employees, e=>e.gender);
-  if (charts.gender) charts.gender.destroy();
-  charts.gender = new Chart(document.getElementById("genderChart"), {
-    type:"doughnut",
-    data:{labels:Object.keys(genderMap),datasets:[{data:Object.values(genderMap),backgroundColor:["#4f8bff","#ff6b9b","#ffce6e","#7f9cff"],borderWidth:0}]},
-    options:{
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins:{legend:{labels:{color:"#ccc"}}}
+    function renderTenureCards() {
+      let t0 = 0, t3 = 0, t12 = 0, t24 = 0;
+      employees.forEach(e => {
+        const t = calcTenureMonths(e.joining_date);
+        if (t == null || t < 0) return;
+        if (t < 3) t0++;
+        else if (t < 12) t3++;
+        else if (t < 24) t12++;
+        else t24++;
+      });
+
+      document.getElementById("tenure0_3").innerText = t0;
+      document.getElementById("tenure3_12").innerText = t3;
+      document.getElementById("tenure12_24").innerText = t12;
+      document.getElementById("tenure24p").innerText = t24;
+
+      renderTenureChart([t0, t3, t12, t24]);
     }
-  });
 
-  /* AGE */
-  const ageMap = countBy(employees, ageGroup);
-  if (charts.age) charts.age.destroy();
-  charts.age = new Chart(document.getElementById("ageChart"), {
-    type:"bar",
-    data:{labels:Object.keys(ageMap),datasets:[{data:Object.values(ageMap),backgroundColor:"#ff6b9b"}]},
-    options:{
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins:{legend:{display:false}},
-      scales:{x:{ticks:{color:"#ccc"},grid:{display:false}},y:{ticks:{color:"#ccc"},grid:{color:"rgba(255,255,255,0.08)"}}}
+    function renderTenureChart(vals) {
+      if (charts.tenure) charts.tenure.destroy();
+      charts.tenure = new Chart(document.getElementById("tenureChart"), {
+        type: "bar",
+        data: {
+          labels: ["<3m", "3m–1y", "1–2y", "2+y"],
+          datasets: [{ data: vals, backgroundColor: ["#4f8bff", "#7f9cff", "#ff6b9b", "#ffce6e"], borderWidth: 0 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#ddd" }, grid: { display: false } },
+            y: { ticks: { color: "#ddd" }, grid: { color: "rgba(255,255,255,0.08)" } }
+          }
+        }
+      });
     }
-  });
 
-  renderProbationTable();
-}
+    /* =============================================================
+       COMPOSITION CHARTS
+    ============================================================= */
 
-/* =============================================================
-   PROBATION TABLE
-============================================================= */
+    function countBy(list, fn) {
+      const map = {};
+      list.forEach(e => {
+        const k = fn(e);
+        map[k] = (map[k] || 0) + 1;
+      });
+      return map;
+    }
 
-function renderProbationTable() {
-  const tbody = document.getElementById("probationTableBody");
-  tbody.innerHTML="";
+    function ageGroup(e) {
+      const d = parseDate(e.dob);
+      if (!d) return "Unknown";
+      const now = new Date();
+      let age = now.getFullYear() - d.getFullYear();
+      const m = now.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+      if (age < 25) return "Under 25";
+      if (age < 35) return "25–34";
+      if (age < 45) return "35–44";
+      if (age < 55) return "45–54";
+      return "55+";
+    }
 
-  const now = new Date();
+    function renderOverviewCharts() {
 
-  const list = employees
-    .filter(e=>e.status_clean==="Probation")
-    .map(e=>{
-      const end=parseDate(e.probation_end);
-      const days = end ? Math.ceil((end-now)/(1000*60*60*24)) : null;
-      return {e,end,days};
-    })
-    .filter(x=>x.days!=null && x.days>=0 && x.days<=30)
-    .sort((a,b)=>a.days-b.days);
+      /* DEPARTMENT */
+      const deptMap = countBy(employees, e => e.department);
+      if (charts.dept) charts.dept.destroy();
+      charts.dept = new Chart(document.getElementById("deptChart"), {
+        type: "bar",
+        data: { labels: Object.keys(deptMap), datasets: [{ data: Object.values(deptMap), backgroundColor: "#4f8bff" }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: "#ccc" }, grid: { display: false } }, y: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.08)" } } }
+        }
+      });
 
-  if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:14px; opacity:0.6;">No probation ending soon</td></tr>`;
-    return;
-  }
+      /* GENDER */
+      const genderMap = countBy(employees, e => e.gender);
+      if (charts.gender) charts.gender.destroy();
+      charts.gender = new Chart(document.getElementById("genderChart"), {
+        type: "doughnut",
+        data: { labels: Object.keys(genderMap), datasets: [{ data: Object.values(genderMap), backgroundColor: ["#4f8bff", "#ff6b9b", "#ffce6e", "#7f9cff"], borderWidth: 0 }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { labels: { color: "#ccc" } } }
+        }
+      });
 
-  list.forEach(x=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML = `
+      /* AGE */
+      const ageMap = countBy(employees, ageGroup);
+      if (charts.age) charts.age.destroy();
+      charts.age = new Chart(document.getElementById("ageChart"), {
+        type: "bar",
+        data: { labels: Object.keys(ageMap), datasets: [{ data: Object.values(ageMap), backgroundColor: "#ff6b9b" }] },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: "#ccc" }, grid: { display: false } }, y: { ticks: { color: "#ccc" }, grid: { color: "rgba(255,255,255,0.08)" } } }
+        }
+      });
+
+      renderProbationTable();
+    }
+
+    /* =============================================================
+       PROBATION TABLE
+    ============================================================= */
+
+    function renderProbationTable() {
+      const tbody = document.getElementById("probationTableBody");
+      tbody.innerHTML = "";
+
+      const now = new Date();
+
+      const list = employees
+        .filter(e => e.status_clean === "Probation")
+        .map(e => {
+          const end = parseDate(e.probation_end);
+          const days = end ? Math.ceil((end - now) / (1000 * 60 * 60 * 24)) : null;
+          return { e, end, days };
+        })
+        .filter(x => x.days != null && x.days >= 0 && x.days <= 30)
+        .sort((a, b) => a.days - b.days);
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:14px; opacity:0.6;">No probation ending soon</td></tr>`;
+        return;
+      }
+
+      list.forEach(x => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
       <td>${x.e.name}</td>
       <td>${x.e.department}</td>
       <td>${formatDate(x.e.probation_end)}</td>
       <td>${x.days}</td>
     `;
-    tr.onclick = () => showEmployeeModal(x.e);
-    tbody.appendChild(tr);
-  });
-}
-
-/* =============================================================
-   PEOPLE FILTERS
-============================================================= */
-
-function setupPeopleFilters() {
-  document.getElementById("searchInput").oninput = applyPeopleFilters;
-  document.getElementById("filterStatus").onchange = applyPeopleFilters;
-  document.getElementById("filterDept").onchange = applyPeopleFilters;
-  document.getElementById("filterCountry").onchange = applyPeopleFilters;
-}
-
-function buildPeopleFilters() {
-  const deptSel=document.getElementById("filterDept");
-  const deps=[...new Set(employees.map(e=>e.department).filter(Boolean))].sort();
-  deps.forEach(d=>{
-    const opt=document.createElement("option");
-    opt.value=d; opt.innerText=d;
-    deptSel.appendChild(opt);
-  });
-
-  const countrySel=document.getElementById("filterCountry");
-  const countries=[...new Set(employees.map(e=>e.country).filter(Boolean))].sort();
-  countries.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c; opt.innerText=c;
-    countrySel.appendChild(opt);
-  });
-}
-
-function applyPeopleFilters() {
-  const search = document.getElementById("searchInput").value.toLowerCase();
-  const fs = document.getElementById("filterStatus").value;
-  const fd = document.getElementById("filterDept").value;
-  const fc = document.getElementById("filterCountry").value;
-
-  let list = employees.slice();
-
-  list = list.filter(e=>{
-    let ok=true;
-    if (fs) ok = ok && e.status_clean===fs;
-    if (fd) ok = ok && e.department===fd;
-    if (fc) ok = ok && e.country===fc;
-
-    if (search) {
-      const blob = (e.name+" "+e.designation+" "+e.department+" "+e.id).toLowerCase();
-      ok = ok && blob.includes(search);
+        tr.onclick = () => showEmployeeModal(x.e);
+        tbody.appendChild(tr);
+      });
     }
-    return ok;
-  });
 
-  renderPeopleTable(list);
-}
+    /* =============================================================
+       PEOPLE FILTERS
+    ============================================================= */
 
-function renderPeopleTable(list) {
-  const tbody=document.getElementById("employeeTableBody");
-  tbody.innerHTML="";
+    function setupPeopleFilters() {
+      document.getElementById("searchInput").oninput = applyPeopleFilters;
+      document.getElementById("filterStatus").onchange = applyPeopleFilters;
+      document.getElementById("filterDept").onchange = applyPeopleFilters;
+      document.getElementById("filterCountry").onchange = applyPeopleFilters;
+    }
 
-  if (!list.length) {
-    tbody.innerHTML=`<tr><td colspan="10" style="text-align:center; padding:14px; opacity:0.6;">No employees found</td></tr>`;
-    return;
-  }
+    function buildPeopleFilters() {
+      const deptSel = document.getElementById("filterDept");
+      const deps = [...new Set(employees.map(e => e.department).filter(Boolean))].sort();
+      deps.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d; opt.innerText = d;
+        deptSel.appendChild(opt);
+      });
 
-  list.forEach(e=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
+      const countrySel = document.getElementById("filterCountry");
+      const countries = [...new Set(employees.map(e => e.country).filter(Boolean))].sort();
+      countries.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c; opt.innerText = c;
+        countrySel.appendChild(opt);
+      });
+    }
+
+    function applyPeopleFilters() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const fs = document.getElementById("filterStatus").value;
+      const fd = document.getElementById("filterDept").value;
+      const fc = document.getElementById("filterCountry").value;
+
+      let list = employees.slice();
+
+      list = list.filter(e => {
+        let ok = true;
+        if (fs) ok = ok && e.status_clean === fs;
+        if (fd) ok = ok && e.department === fd;
+        if (fc) ok = ok && e.country === fc;
+
+        if (search) {
+          const blob = (e.name + " " + e.designation + " " + e.department + " " + e.id).toLowerCase();
+          ok = ok && blob.includes(search);
+        }
+        return ok;
+      });
+
+      renderPeopleTable(list);
+    }
+
+    function renderPeopleTable(list) {
+      const tbody = document.getElementById("employeeTableBody");
+      tbody.innerHTML = "";
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:14px; opacity:0.6;">No employees found</td></tr>`;
+        return;
+      }
+
+      list.forEach(e => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
       <td>${e.id}</td>
       <td>${e.name}</td>
       <td>${e.designation}</td>
@@ -1302,187 +1335,188 @@ function renderPeopleTable(list) {
       <td>${formatNumber(e.base_salary)}</td>
       <td>${e.salary_currency}</td>
     `;
-    tr.onclick = () => showEmployeeModal(e);
-    tbody.appendChild(tr);
-  });
-}
-
-function badgeStatus(st) {
-  if (st==="Active") return `<span class="status-pill status-active">Active</span>`;
-  if (st==="Probation") return `<span class="status-pill status-probation">Probation</span>`;
-  return `<span class="status-pill status-inactive">Inactive</span>`;
-}
-
-/* =============================================================
-   COMPENSATION
-============================================================= */
-
-function buildCompCountryFilter() {
-  const sel=document.getElementById("compCountry");
-  const countries=[...new Set(employees.map(e=>e.country).filter(Boolean))].sort();
-  countries.forEach(c=>{
-    const opt=document.createElement("option");
-    opt.value=c; opt.innerText=c;
-    sel.appendChild(opt);
-  });
-  sel.onchange=()=>renderCompensation();
-}
-
-function renderCompensation() {
-  const fc=document.getElementById("compCountry").value;
-
-  let list=employees.slice();
-  if (fc) list=list.filter(e=>e.country===fc);
-
-  const total=list.reduce((s,e)=>s+salaryNPR(e),0);
-  const avg=list.length?total/list.length:0;
-
-  document.getElementById("totalPayrollNPR").innerText=formatNumber(total);
-  document.getElementById("avgSalaryNPR").innerText=formatNumber(avg);
-
-  renderCurrencyCards(list);
-  renderCountryPayrollTable();
-}
-
-function renderCurrencyCards(list) {
-  const wrap=document.getElementById("currencyCards");
-  wrap.innerHTML="";
-
-  const map={};
-
-  list.forEach(e=>{
-    if (!map[e.salary_currency]) {
-      map[e.salary_currency]={count:0,total:0,rate:fxRates[e.salary_currency]};
+        tr.onclick = () => showEmployeeModal(e);
+        tbody.appendChild(tr);
+      });
     }
-    map[e.salary_currency].count++;
-    map[e.salary_currency].total+=e.base_salary;
-  });
 
-  Object.keys(map).forEach(cur=>{
-    const obj=map[cur];
-    const div=document.createElement("div");
-    div.style=`padding:14px; margin-bottom:10px; background:rgba(255,255,255,0.08); border:var(--border-soft); border-radius:12px;`;
-    div.innerHTML=`
+    function badgeStatus(st) {
+      if (st === "Active") return `<span class="status-pill status-active">Active</span>`;
+      if (st === "Probation") return `<span class="status-pill status-probation">Probation</span>`;
+      return `<span class="status-pill status-inactive">Inactive</span>`;
+    }
+
+    /* =============================================================
+       COMPENSATION
+    ============================================================= */
+
+    function buildCompCountryFilter() {
+      const sel = document.getElementById("compCountry");
+      const countries = [...new Set(employees.map(e => e.country).filter(Boolean))].sort();
+      countries.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c; opt.innerText = c;
+        sel.appendChild(opt);
+      });
+      sel.onchange = () => renderCompensation();
+    }
+
+    function renderCompensation() {
+      const fc = document.getElementById("compCountry").value;
+
+      let list = employees.slice();
+      if (fc) list = list.filter(e => e.country === fc);
+
+      const total = list.reduce((s, e) => s + salaryNPR(e), 0);
+      const avg = list.length ? total / list.length : 0;
+
+      document.getElementById("totalPayrollNPR").innerText = formatNumber(total);
+      document.getElementById("avgSalaryNPR").innerText = formatNumber(avg);
+
+      renderCurrencyCards(list);
+      renderCountryPayrollTable();
+    }
+
+    function renderCurrencyCards(list) {
+      const wrap = document.getElementById("currencyCards");
+      wrap.innerHTML = "";
+
+      const map = {};
+
+      list.forEach(e => {
+        if (!map[e.salary_currency]) {
+          map[e.salary_currency] = { count: 0, total: 0, rate: fxRates[e.salary_currency] };
+        }
+        map[e.salary_currency].count++;
+        map[e.salary_currency].total += e.base_salary;
+      });
+
+      Object.keys(map).forEach(cur => {
+        const obj = map[cur];
+        const div = document.createElement("div");
+        div.style = `padding:14px; margin-bottom:10px; background:rgba(255,255,255,0.08); border:var(--border-soft); border-radius:12px;`;
+        div.innerHTML = `
       <div style="font-size:15px; font-weight:600;">${cur}</div>
       <div style="font-size:13px; margin-top:4px;">Employees: ${obj.count}</div>
       <div style="font-size:13px; margin-top:4px;">Total: ${formatNumber(obj.total)} ${cur}</div>
       <div style="font-size:12px; opacity:0.7; margin-top:4px;">FX → NPR: ${obj.rate}</div>
-      <div style="font-size:14px; margin-top:6px; font-weight:600;">NPR: ${formatNumber(obj.total*obj.rate)}</div>
+      <div style="font-size:14px; margin-top:6px; font-weight:600;">NPR: ${formatNumber(obj.total * obj.rate)}</div>
     `;
-    wrap.appendChild(div);
-  });
-}
+        wrap.appendChild(div);
+      });
+    }
 
-function renderCountryPayrollTable() {
-  const tbody=document.getElementById("countryPayrollBody");
-  tbody.innerHTML="";
+    function renderCountryPayrollTable() {
+      const tbody = document.getElementById("countryPayrollBody");
+      tbody.innerHTML = "";
 
-  const map={};
-  employees.forEach(e=>{
-    if (!map[e.country]) map[e.country]={count:0,total:0};
-    map[e.country].count++;
-    map[e.country].total+=salaryNPR(e);
-  });
+      const map = {};
+      employees.forEach(e => {
+        if (!map[e.country]) map[e.country] = { count: 0, total: 0 };
+        map[e.country].count++;
+        map[e.country].total += salaryNPR(e);
+      });
 
-  const list=Object.keys(map).map(k=>({country:k,count:map[k].count,total:map[k].total})).sort((a,b)=>b.total-a.total);
+      const list = Object.keys(map).map(k => ({ country: k, count: map[k].count, total: map[k].total })).sort((a, b) => b.total - a.total);
 
-  document.getElementById("topCountryName").innerText= list.length?list[0].country:"–";
-  document.getElementById("topCountryVal").innerText= list.length?formatNumber(list[0].total)+" NPR":"";
+      document.getElementById("topCountryName").innerText = list.length ? list[0].country : "–";
+      document.getElementById("topCountryVal").innerText = list.length ? formatNumber(list[0].total) + " NPR" : "";
 
-  list.forEach(x=>{
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
+      list.forEach(x => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
       <td>${x.country}</td>
       <td>${x.count}</td>
       <td>${formatNumber(x.total)}</td>
     `;
-    tbody.appendChild(tr);
-  });
-}
+        tbody.appendChild(tr);
+      });
+    }
 
-/* =============================================================
-   TAB SWITCHING
-============================================================= */
+    /* =============================================================
+       TAB SWITCHING
+    ============================================================= */
 
-function setupTabs() {
-  document.querySelectorAll(".tab").forEach(t => {
-    t.onclick = () => {
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-      t.classList.add("active");
-      document.getElementById("tab-"+t.dataset.tab).classList.add("active");
-    };
-  });
-}
+    function setupTabs() {
+      document.querySelectorAll(".tab").forEach(t => {
+        t.onclick = () => {
+          document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+          t.classList.add("active");
+          document.getElementById("tab-" + t.dataset.tab).classList.add("active");
+        };
+      });
+    }
 
-/* KPI CARD DRILLDOWN ---------------------------------------*/
+    /* KPI CARD DRILLDOWN ---------------------------------------*/
 
-function setupDrilldowns() {
-  document.getElementById("kpiTotalCard").onclick = ()=>{
-    switchTab("people");
-    resetFilters();
-  };
+    function setupDrilldowns() {
+      document.getElementById("kpiTotalCard").onclick = () => {
+        switchTab("people");
+        resetFilters();
+      };
 
-  document.getElementById("kpiActiveCard").onclick = ()=>{
-    switchTab("people");
-    resetFilters();
-    document.getElementById("filterStatus").value="Active";
-    applyPeopleFilters();
-  };
+      document.getElementById("kpiActiveCard").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        document.getElementById("filterStatus").value = "Active";
+        applyPeopleFilters();
+      };
 
-  document.getElementById("kpiInactiveCard").onclick = ()=>{
-    switchTab("people");
-    resetFilters();
-    document.getElementById("filterStatus").value="Inactive";
-    applyPeopleFilters();
-  };
+      document.getElementById("kpiInactiveCard").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        document.getElementById("filterStatus").value = "Inactive";
+        applyPeopleFilters();
+      };
 
-  document.getElementById("kpiProbCard").onclick = ()=>{
-    switchTab("people");
-    resetFilters();
-    document.getElementById("filterStatus").value="Probation";
-    applyPeopleFilters();
-  };
-}
+      document.getElementById("kpiProbCard").onclick = () => {
+        switchTab("people");
+        resetFilters();
+        document.getElementById("filterStatus").value = "Probation";
+        applyPeopleFilters();
+      };
+    }
 
-function switchTab(key) {
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".tab-panel").forEach(t => t.classList.remove("active"));
-  document.querySelector(`.tab[data-tab='${key}']`).classList.add("active");
-  document.getElementById("tab-"+key).classList.add("active");
-}
+    function switchTab(key) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(t => t.classList.remove("active"));
+      document.querySelector(`.tab[data-tab='${key}']`).classList.add("active");
+      document.getElementById("tab-" + key).classList.add("active");
+    }
 
-function resetFilters() {
-  document.getElementById("filterStatus").value="";
-  document.getElementById("filterDept").value="";
-  document.getElementById("filterCountry").value="";
-  document.getElementById("searchInput").value="";
-}
+    function resetFilters() {
+      document.getElementById("filterStatus").value = "";
+      document.getElementById("filterDept").value = "";
+      document.getElementById("filterCountry").value = "";
+      document.getElementById("searchInput").value = "";
+    }
 
-/* =============================================================
-   INIT
-============================================================= */
+    /* =============================================================
+       INIT
+    ============================================================= */
 
-async function init() {
-  await loadHRData();
+    async function init() {
+      await loadHRData();
 
-  renderKPIs();
-  renderTenureCards();
-  renderOverviewCharts();
+      renderKPIs();
+      renderTenureCards();
+      renderOverviewCharts();
 
-  buildPeopleFilters();
-  setupPeopleFilters();
-  applyPeopleFilters();
+      buildPeopleFilters();
+      setupPeopleFilters();
+      applyPeopleFilters();
 
-  buildCompCountryFilter();
-  renderCompensation();
+      buildCompCountryFilter();
+      renderCompensation();
 
-  setupTabs();
-  setupDrilldowns();
-}
+      setupTabs();
+      setupDrilldowns();
+    }
 
-init();
+    init();
 
-</script>
+  </script>
 </body>
+
 </html>
