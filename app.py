@@ -90,6 +90,14 @@ REPORTS = [
         "category": "Human Resources",
         "page": "pages/6_👥_HR_Analytics.py",
         "features": ["Live Data", "Tenure & Demographics", "Compensation & FX"]
+    },
+    {
+        "title": "HR Document Generator",
+        "icon": "📝",
+        "desc": "Generate official employment documents (Salary Certs, Experience Letters).",
+        "category": "Human Resources",
+        "page": "pages/7_📝_HR_Docs_Generator.py",
+        "features": ["Live Notion Data", "Docx Generation", "Bulk Processing"]
     }
 ]
 
