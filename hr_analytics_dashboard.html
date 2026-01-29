@@ -584,261 +584,290 @@
 
 <body>
 
-  <div class="shell">
+  <!-- LOGIN OVERLAY -->
+  <div id="login-overlay" style="
+    position: fixed; inset: 0; background: #050612; z-index: 9999; display: flex; 
+    align-items: center; justify-content: center; flex-direction: column;
+    background: radial-gradient(circle at center, #10142a 0%, #050612 100%);">
 
-    <h1>HR Analytics Dashboard</h1>
-    <div class="sub-title">Premium Glass Neon Edition · Live Notion + Cloudflare + FX</div>
-
-    <div class="live-pill">
-      <div class="live-dot"></div>
-      LIVE DATA FEED · FX SYNC
+    <h2 style="margin-bottom: 20px; color: var(--accent);">Security Check</h2>
+    <div
+      style="background: rgba(255,255,255,0.05); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; backdrop-filter: blur(10px);">
+      <p style="margin-bottom: 15px; color: #ccc;">Enter Password to Access Dashboard</p>
+      <input type="password" id="passwordInput" placeholder="Password"
+        onkeyup="if(event.key === 'Enter') checkPassword()"
+        style="
+        background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px; border-radius: 8px; width: 200px; text-align: center; outline: none; transition: 0.3s; font-size: 16px;">
+      <div style="margin-top: 20px;">
+        <button onclick="checkPassword()"
+          style="
+          background: var(--accent); color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s;">
+          UNLOCK
+        </button>
+      </div>
+      <p id="loginError" style="color: var(--danger); margin-top: 10px; font-size: 13px; min-height: 20px;"></p>
     </div>
+  </div>
 
-    <div class="tabs">
-      <div class="tab active" data-tab="overview">Overview</div>
-      <div class="tab" data-tab="people">People</div>
-      <div class="tab" data-tab="compensation">Compensation</div>
-    </div>
+  <div id="app-content" style="display: none;">
 
-    <!-- CLEAN KPI GRID -->
-    <div class="kpi-grid">
-      <div class="kpi-card" id="kpiTotalCard">
-        <div class="kpi-title">Total Employees</div>
-        <div class="kpi-value" id="kpiTotal">0</div>
-        <div class="kpi-sub">All Staff</div>
+    <div class="shell">
+
+      <h1>HR Analytics Dashboard</h1>
+      <div class="sub-title">Premium Glass Neon Edition · Live Notion + Cloudflare + FX</div>
+
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        LIVE DATA FEED · FX SYNC
       </div>
 
-      <div class="kpi-card" id="kpiActiveCard">
-        <div class="kpi-title">Active Employees</div>
-        <div class="kpi-value" id="kpiActive">0</div>
-        <div class="kpi-sub">Including probation</div>
+      <div class="tabs">
+        <div class="tab active" data-tab="overview">Overview</div>
+        <div class="tab" data-tab="people">People</div>
+        <div class="tab" data-tab="compensation">Compensation</div>
       </div>
 
-      <div class="kpi-card" id="kpiInactiveCard">
-        <div class="kpi-title">Inactive Employees</div>
-        <div class="kpi-value" id="kpiInactive">0</div>
-        <div class="kpi-sub">Attrition: <span id="kpiAttr">0%</span></div>
-      </div>
-
-      <div class="kpi-card" id="kpiProbCard">
-        <div class="kpi-title">On Probation</div>
-        <div class="kpi-value" id="kpiProbation">0</div>
-        <div class="kpi-sub">Ending soon</div>
-      </div>
-    </div>
-
-    <!-- ================= OVERVIEW ================= -->
-    <div class="tab-panel active" id="tab-overview">
-
-      <div class="section-card">
-        <div class="section-title">Employee Tenure Summary</div>
-
-        <div class="tenure-grid">
-          <div class="tenure-card">
-            <div class="kpi-title">New Joiners (&lt; 3 months)</div>
-            <div class="tenure-value" id="tenure0_3">0</div>
-          </div>
-
-          <div class="tenure-card">
-            <div class="kpi-title">3 months – 1 year</div>
-            <div class="tenure-value" id="tenure3_12">0</div>
-          </div>
-
-          <div class="tenure-card">
-            <div class="kpi-title">1 – 2 years</div>
-            <div class="tenure-value" id="tenure12_24">0</div>
-          </div>
-
-          <div class="tenure-card">
-            <div class="kpi-title">2+ years</div>
-            <div class="tenure-value" id="tenure24p">0</div>
-          </div>
+      <!-- CLEAN KPI GRID -->
+      <div class="kpi-grid">
+        <div class="kpi-card" id="kpiTotalCard">
+          <div class="kpi-title">Total Employees</div>
+          <div class="kpi-value" id="kpiTotal">0</div>
+          <div class="kpi-sub">All Staff</div>
         </div>
 
-        <div style="margin-top:28px;">
-          <canvas id="tenureChart"></canvas>
+        <div class="kpi-card" id="kpiActiveCard">
+          <div class="kpi-title">Active Employees</div>
+          <div class="kpi-value" id="kpiActive">0</div>
+          <div class="kpi-sub">Including probation</div>
+        </div>
+
+        <div class="kpi-card" id="kpiInactiveCard">
+          <div class="kpi-title">Inactive Employees</div>
+          <div class="kpi-value" id="kpiInactive">0</div>
+          <div class="kpi-sub">Attrition: <span id="kpiAttr">0%</span></div>
+        </div>
+
+        <div class="kpi-card" id="kpiProbCard">
+          <div class="kpi-title">On Probation</div>
+          <div class="kpi-value" id="kpiProbation">0</div>
+          <div class="kpi-sub">Ending soon</div>
         </div>
       </div>
 
-      <div class="section-card">
-        <div class="section-title">Workforce Composition</div>
+      <!-- ================= OVERVIEW ================= -->
+      <div class="tab-panel active" id="tab-overview">
 
-        <div class="overview-grid">
-          <div>
-            <div class="kpi-title">Department Distribution</div>
-            <canvas id="deptChart"></canvas>
-          </div>
+        <div class="section-card">
+          <div class="section-title">Employee Tenure Summary</div>
 
-          <div class="stack-2">
-            <div>
-              <div class="kpi-title">Gender Split</div>
-              <canvas id="genderChart"></canvas>
+          <div class="tenure-grid">
+            <div class="tenure-card">
+              <div class="kpi-title">New Joiners (&lt; 3 months)</div>
+              <div class="tenure-value" id="tenure0_3">0</div>
             </div>
+
+            <div class="tenure-card">
+              <div class="kpi-title">3 months – 1 year</div>
+              <div class="tenure-value" id="tenure3_12">0</div>
+            </div>
+
+            <div class="tenure-card">
+              <div class="kpi-title">1 – 2 years</div>
+              <div class="tenure-value" id="tenure12_24">0</div>
+            </div>
+
+            <div class="tenure-card">
+              <div class="kpi-title">2+ years</div>
+              <div class="tenure-value" id="tenure24p">0</div>
+            </div>
+          </div>
+
+          <div style="margin-top:28px;">
+            <canvas id="tenureChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">Workforce Composition</div>
+
+          <div class="overview-grid">
             <div>
-              <div class="kpi-title">Age Groups</div>
-              <canvas id="ageChart"></canvas>
+              <div class="kpi-title">Department Distribution</div>
+              <canvas id="deptChart"></canvas>
+            </div>
+
+            <div class="stack-2">
+              <div>
+                <div class="kpi-title">Gender Split</div>
+                <canvas id="genderChart"></canvas>
+              </div>
+              <div>
+                <div class="kpi-title">Age Groups</div>
+                <canvas id="ageChart"></canvas>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="section-card">
-        <div class="section-title">Probation Ending Within 30 Days</div>
+        <div class="section-card">
+          <div class="section-title">Probation Ending Within 30 Days</div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Probation End</th>
-                <th>Days Left</th>
-              </tr>
-            </thead>
-            <tbody id="probationTableBody"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Department</th>
+                  <th>Probation End</th>
+                  <th>Days Left</th>
+                </tr>
+              </thead>
+              <tbody id="probationTableBody"></tbody>
+            </table>
+          </div>
         </div>
+
       </div>
 
-    </div>
+      <!-- ================= PEOPLE ================= -->
+      <div class="tab-panel" id="tab-people">
 
-    <!-- ================= PEOPLE ================= -->
-    <div class="tab-panel" id="tab-people">
+        <div class="section-card">
+          <div class="section-title">Employee Master List</div>
 
-      <div class="section-card">
-        <div class="section-title">Employee Master List</div>
-
-        <div style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
-          <input id="searchInput" placeholder="Search by name, ID, designation..." style="flex:1; padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+          <div style="display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap;">
+            <input id="searchInput" placeholder="Search by name, ID, designation..." style="flex:1; padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white; font-size:13px;">
 
-          <select id="filterStatus" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+            <select id="filterStatus" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-            <option value="">Status: All</option>
-            <option value="Active">Active</option>
-            <option value="Probation">Probation</option>
-            <option value="Inactive">Inactive</option>
-          </select>
+              <option value="">Status: All</option>
+              <option value="Active">Active</option>
+              <option value="Probation">Probation</option>
+              <option value="Inactive">Inactive</option>
+            </select>
 
-          <select id="filterDept" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+            <select id="filterDept" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-            <option value="">Department: All</option>
-          </select>
+              <option value="">Department: All</option>
+            </select>
 
-          <select id="filterCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+            <select id="filterCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-            <option value="">Country: All</option>
-          </select>
+              <option value="">Country: All</option>
+            </select>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Designation</th>
+                  <th>Department</th>
+                  <th>Country</th>
+                  <th>Status</th>
+                  <th>Joining</th>
+                  <th>Probation End</th>
+                  <th>Salary</th>
+                  <th>Currency</th>
+                </tr>
+              </thead>
+              <tbody id="employeeTableBody"></tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Designation</th>
-                <th>Department</th>
-                <th>Country</th>
-                <th>Status</th>
-                <th>Joining</th>
-                <th>Probation End</th>
-                <th>Salary</th>
-                <th>Currency</th>
-              </tr>
-            </thead>
-            <tbody id="employeeTableBody"></tbody>
-          </table>
-        </div>
       </div>
 
-    </div>
+      <!-- ================= COMPENSATION ================= -->
+      <div class="tab-panel" id="tab-compensation">
 
-    <!-- ================= COMPENSATION ================= -->
-    <div class="tab-panel" id="tab-compensation">
+        <div class="section-card">
 
-      <div class="section-card">
+          <div class="section-title">Compensation & Payroll Summary</div>
 
-        <div class="section-title">Compensation & Payroll Summary</div>
-
-        <div style="margin-bottom:20px;">
-          <select id="compCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
+          <div style="margin-bottom:20px;">
+            <select id="compCountry" style="padding:12px; border-radius:12px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); color:white;">
-            <option value="">Country: All</option>
-          </select>
-        </div>
+              <option value="">Country: All</option>
+            </select>
+          </div>
 
-        <div class="overview-grid" style="grid-template-columns:1.2fr 1fr; gap:26px;">
+          <div class="overview-grid" style="grid-template-columns:1.2fr 1fr; gap:26px;">
 
-          <div>
+            <div>
+
+              <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
+          border:var(--border-soft); box-shadow:var(--shadow-soft);">
+                <h3 style="margin:0; font-size:18px;">Total Payroll (NPR)</h3>
+                <div id="totalPayrollNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
+              </div>
+
+              <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+                <h3 style="margin:0; font-size:18px;">Average Salary (NPR)</h3>
+                <div id="avgSalaryNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
+              </div>
+
+              <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+                <h3 style="margin:0; font-size:18px;">Top Paying Country</h3>
+                <div id="topCountryName" style="font-size:22px; margin-top:4px;">–</div>
+                <div id="topCountryVal" style="font-size:14px; margin-top:4px; color:var(--text-muted);"></div>
+              </div>
+
+              <div style="margin-top:16px; padding:20px; border-radius:16px;
+          background:rgba(255,255,255,0.06); border:var(--border-soft);
+          box-shadow:var(--shadow-soft);">
+                <h3 style="margin:0; font-size:18px;">Currency-wise Payroll</h3>
+                <div id="currencyCards" style="margin-top:14px;"></div>
+              </div>
+
+            </div>
 
             <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
-          border:var(--border-soft); box-shadow:var(--shadow-soft);">
-              <h3 style="margin:0; font-size:18px;">Total Payroll (NPR)</h3>
-              <div id="totalPayrollNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
-            </div>
-
-            <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-              <h3 style="margin:0; font-size:18px;">Average Salary (NPR)</h3>
-              <div id="avgSalaryNPR" style="font-size:26px; margin-top:6px; font-weight:600;">0</div>
-            </div>
-
-            <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-              <h3 style="margin:0; font-size:18px;">Top Paying Country</h3>
-              <div id="topCountryName" style="font-size:22px; margin-top:4px;">–</div>
-              <div id="topCountryVal" style="font-size:14px; margin-top:4px; color:var(--text-muted);"></div>
-            </div>
-
-            <div style="margin-top:16px; padding:20px; border-radius:16px;
-          background:rgba(255,255,255,0.06); border:var(--border-soft);
-          box-shadow:var(--shadow-soft);">
-              <h3 style="margin:0; font-size:18px;">Currency-wise Payroll</h3>
-              <div id="currencyCards" style="margin-top:14px;"></div>
-            </div>
-
-          </div>
-
-          <div style="padding:20px; border-radius:16px; background:rgba(255,255,255,0.06);
         border:var(--border-soft); box-shadow:var(--shadow-soft);">
-            <h3 style="margin:0; font-size:18px;">Country-wise Payroll (NPR)</h3>
+              <h3 style="margin:0; font-size:18px;">Country-wise Payroll (NPR)</h3>
 
-            <div class="table-wrap" style="margin-top:14px; max-height:390px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Country</th>
-                    <th>Employees</th>
-                    <th>Total Payroll</th>
-                  </tr>
-                </thead>
-                <tbody id="countryPayrollBody"></tbody>
-              </table>
+              <div class="table-wrap" style="margin-top:14px; max-height:390px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Country</th>
+                      <th>Employees</th>
+                      <th>Total Payroll</th>
+                    </tr>
+                  </thead>
+                  <tbody id="countryPayrollBody"></tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EMPLOYEE DETAIL MODAL -->
+    <div class="modal-overlay" id="employeeModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-close" onclick="closeEmployeeModal()">&times;</div>
+          <h2 class="modal-employee-name" id="modalName">Employee Name</h2>
+          <div class="modal-employee-id" id="modalId">ID: NP001</div>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Content will be dynamically generated -->
         </div>
       </div>
     </div>
 
-  </div>
-
-  <!-- EMPLOYEE DETAIL MODAL -->
-  <div class="modal-overlay" id="employeeModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-close" onclick="closeEmployeeModal()">&times;</div>
-        <h2 class="modal-employee-name" id="modalName">Employee Name</h2>
-        <div class="modal-employee-id" id="modalId">ID: NP001</div>
-      </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Content will be dynamically generated -->
-      </div>
-    </div>
-  </div>
+  </div> <!-- End app-content -->
 
   <!-- =======================================================
      JAVASCRIPT — ENHANCED WITH EMPLOYEE MODAL
@@ -846,8 +875,37 @@
 
   <script>
 
+    /* =============================================================
+       LOGIN LOGIC
+    ============================================================= */
+    function checkPassword() {
+      const input = document.getElementById("passwordInput");
+      const err = document.getElementById("loginError");
+
+      if (input.value === "Admin123") {
+        document.getElementById("login-overlay").style.display = "none";
+        document.getElementById("app-content").style.display = "block";
+        sessionStorage.setItem("hr_auth", "true");
+      } else {
+        err.innerText = "Access Denied";
+        input.style.borderColor = "var(--danger)";
+        setTimeout(() => input.style.borderColor = "rgba(255,255,255,0.2)", 1000);
+      }
+    }
+
+    // Check session on load
+    if (sessionStorage.getItem("hr_auth") === "true") {
+      document.getElementById("login-overlay").style.display = "none";
+      document.getElementById("app-content").style.display = "block";
+    }
+
     let employees = [];
-    let fxRates = { NPR: 1 };
+    let fxRates = {
+      NPR: 1,
+      AUD: 103.00,  // Nepal Rastra Bank rate
+      INR: 1.60,    // Nepal Rastra Bank rate (160.15 / 100)
+      USD: 147.16
+    };
     let charts = {};
 
     const API_URL = "https://hr-api.ashishoct34.workers.dev/api/hr";
@@ -867,60 +925,57 @@
 
         fxRates = await loadFxRates(curList);
         console.log("FX rates loaded:", fxRates);
+
+        // Re-render compensation NOW that FX rates are loaded
+        console.log("Re-rendering compensation with updated FX rates...");
+        renderCompensation();
       } catch (error) {
         console.error("Error loading HR data:", error);
       }
     }
 
     async function loadFxRates(currencies) {
-      const rates = { NPR: 1 };
+      // 1. Initialize with SAFE DEFAULTS (Official NRB Rates)
+      const rates = {
+        NPR: 1,
+        AUD: 103,
+        INR: 1.6
+      };
 
-      // Filter out NPR since it's the base currency
+      // 2. Identify currencies to fetch (exclude NPR)
       const nonNPR = currencies.filter(c => c !== "NPR");
 
       if (nonNPR.length === 0) return rates;
 
-      try {
-        console.log("Fetching official NRB rates for:", nonNPR.join(", "));
+      // 3. Fetch LIVE rates from your Cloudflare Worker
+      const FX_API_URL = "https://hr-api.ashishoct34.workers.dev/api/fx";
+      console.log("Fetching live NRB rates for:", nonNPR.join(", "));
 
-        // Fetch rates from same worker as HR data
-        const FX_API_URL = "https://hr-api.ashishoct34.workers.dev/api/fx";
+      const promises = nonNPR.map(async (currency) => {
+        try {
+          const response = await fetch(`${FX_API_URL}?currency=${currency}`);
+          const data = await response.json();
 
-        const promises = nonNPR.map(async (currency) => {
-          try {
-            const response = await fetch(`${FX_API_URL}?currency=${currency}`);
-            const data = await response.json();
-
-            if (data.rate && !data.error) {
-              rates[currency] = data.rate;
-              console.log(`${currency} → NPR: ${data.rate.toFixed(2)} (source: ${data.source}, date: ${data.date})`);
-              if (data.cached) {
-                console.log(`  ↳ Using cached rate`);
-              }
-            } else {
-              console.warn(`No rate for ${currency}, using fallback 1:1`);
-              rates[currency] = 1;
-            }
-          } catch (err) {
-            console.error(`Failed to fetch ${currency} rate:`, err);
-            rates[currency] = 1; // Fallback
+          if (data.rate && !data.error) {
+            rates[currency] = data.rate; // Update with LIVE rate
+            console.log(`${currency} → NPR: ${data.rate.toFixed(2)} (Source: ${data.source}, Date: ${data.date})`);
+          } else {
+            console.warn(`API returned no rate for ${currency}, keeping default: ${rates[currency]}`);
           }
-        });
+        } catch (err) {
+          console.error(`Failed to fetch ${currency} rate, keeping default: ${rates[currency]}`, err);
+        }
+      });
 
-        await Promise.all(promises);
-
-      } catch (error) {
-        console.error("Error fetching FX rates:", error);
-        console.warn("Using fallback 1:1 rates");
-        nonNPR.forEach(c => rates[c] = 1);
-      }
+      // Wait for all fetches to complete
+      await Promise.all(promises);
 
       return rates;
     }
 
     function normalizeEmployee(e) {
-      // Get currency - try multiple field names
-      const currency = (e.salary_currency || e.salary_fx || "NPR").toUpperCase();
+      // Get currency - try multiple field names, normalize to uppercase and trim whitespace
+      const currency = (e.salary_currency || e.salary_fx || "NPR").toUpperCase().trim();
       let salary = e.last_salary || e.base_salary || e.salary_npr || 0;
 
       console.log(`Employee: ${e.name}, Currency: ${currency}, Salary: ${salary}`);
@@ -952,24 +1007,7 @@
       };
     }
 
-    /* =============================================================
-       FX LOADER
-    ============================================================= */
 
-    async function loadFxRates(list) {
-      const map = { NPR: 1 };
-      for (const code of list) {
-        if (code === "NPR") { map["NPR"] = 1; continue; }
-        try {
-          const res = await fetch(`https://api.exchangerate.host/latest?base=${code}&symbols=NPR`);
-          const data = await res.json();
-          map[code] = data.rates.NPR;
-        } catch {
-          map[code] = 1;
-        }
-      }
-      return map;
-    }
 
     /* =============================================================
        UTIL

@@ -54,8 +54,8 @@ async function handleFxRates(request, env, ctx) {
     const currency = url.searchParams.get("currency") || "AUD";
 
     try {
-        // Try cache first
-        const cacheKey = `fx-rate-${currency}`;
+        // Try cache first (v2 to invalidate old 160.15 INR cache)
+        const cacheKey = `fx-rate-v2-${currency}`;
         const cache = caches.default;
         const cacheUrl = new URL(`https://fx-cache/${cacheKey}`);
 
@@ -67,19 +67,27 @@ async function handleFxRates(request, env, ctx) {
         }
 
         // Fetch from Nepal Rastra Bank
-        const nrbResponse = await fetch("https://www.nrb.org.np/api/forex/v1/rates");
+        // NRB API requires date parameters
+        const today = new Date().toISOString().split('T')[0];
+        const nrbUrl = `https://www.nrb.org.np/api/forex/v1/rates?page=1&per_page=100&from=${today}&to=${today}`;
 
+        const nrbResponse = await fetch(nrbUrl);
         if (!nrbResponse.ok) {
             throw new Error(`NRB API failed with status ${nrbResponse.status}`);
         }
 
         const nrbData = await nrbResponse.json();
-        const latestRates = nrbData.data?.payload || [];
 
-        if (!latestRates || latestRates.length === 0) {
+        // Extract rates from the correct nested structure
+        const payload = nrbData.data?.payload?.[0];
+        if (!payload || !payload.rates) {
             throw new Error("No forex data available");
         }
 
+        const latestRates = payload.rates;
+        const rateDate = payload.date;
+
+        // Find the requested currency (e.g., AUD, USD, INR)
         const currencyData = latestRates.find(item => item.currency?.iso3 === currency);
 
         if (!currencyData) {
@@ -88,17 +96,22 @@ async function handleFxRates(request, env, ctx) {
                 available: latestRates.map(r => r.currency?.iso3).filter(Boolean)
             }, 404);
         }
+        // Use sell rate (what you pay in NPR to buy the foreign currency)
+        const sellRate = parseFloat(currencyData.sell) || parseFloat(currencyData.buy);
+        const buyRate = parseFloat(currencyData.buy);
+        const unit = parseInt(currencyData.currency?.unit) || 1;
 
-        const rate = parseFloat(currencyData.sell) || parseFloat(currencyData.buy);
-        const date = nrbData.data?.date || new Date().toISOString().split('T')[0];
+        // Adjust for unit (e.g., INR is per 100, so divide by 100)
+        const rate = sellRate / unit;
 
         const result = {
             rate: rate,
             currency: `${currency}NPR`,
             source: "Nepal Rastra Bank",
-            date: date,
-            buy: parseFloat(currencyData.buy),
-            sell: parseFloat(currencyData.sell),
+            date: rateDate,
+            buy: buyRate / unit,
+            sell: sellRate / unit,
+            unit: unit,
             cached: false
         };
 
