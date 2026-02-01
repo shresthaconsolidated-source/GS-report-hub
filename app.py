@@ -98,6 +98,14 @@ REPORTS = [
         "category": "Human Resources",
         "page": "pages/7_📝_HR_Docs_Generator.py",
         "features": ["Live Notion Data", "Docx Generation", "Bulk Processing"]
+    },
+    {
+        "title": "Financial Report",
+        "icon": "💰",
+        "desc": "Live financial overview, Wise analysis, and automated email reporting.",
+        "category": "Sales & Operations",
+        "page": "pages/8_💰_Financial_Report.py",
+        "features": ["Google Sheets Live", "Ending Balances", "Email Automation"]
     }
 ]
 
