@@ -10,6 +10,22 @@ import requests
 # 1. PAGE SETUP
 st.set_page_config(page_title="Financial Report", page_icon="💰", layout="wide")
 
+# --- AUTHENTICATION ---
+if "financial_auth" not in st.session_state:
+    st.session_state["financial_auth"] = False
+
+if not st.session_state["financial_auth"]:
+    st.title("🔒 Restricted Access")
+    pwd = st.text_input("Enter Admin Password", type="password", key="fin_pwd")
+    if st.button("Login"):
+        if pwd == "Admin123":
+            st.session_state["financial_auth"] = True
+            st.rerun()
+        else:
+            st.error("Invalid Password")
+    st.stop()
+
+
 SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSbLilDFS9QkZu0nGo1LrgYW8yuE1ZCPuBtv4phS4_JuG2QK29aLRr3_6OcLo-nxE_H8koFHmjpo3qx/pub?gid=46034363&single=true&output=csv'
 
 @st.cache_data(ttl=600)

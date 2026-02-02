@@ -8,6 +8,22 @@ import re
 
 st.set_page_config(page_title="HR Document Generator", page_icon="📝", layout="wide")
 
+# --- AUTHENTICATION ---
+if "hr_auth" not in st.session_state:
+    st.session_state["hr_auth"] = False
+
+if not st.session_state["hr_auth"]:
+    st.title("🔒 HR Restricted Access")
+    pwd = st.text_input("Enter Admin Password", type="password", key="hr_pwd")
+    if st.button("Login"):
+        if pwd == "Admin123":
+            st.session_state["hr_auth"] = True
+            st.rerun()
+        else:
+            st.error("Invalid Password")
+    st.stop()
+
+
 st.title("📝 HR Document Generator")
 st.markdown("Generate official Profit / Experience letters linked to live Notion data.")
 
