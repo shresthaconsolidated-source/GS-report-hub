@@ -136,7 +136,16 @@ if uploaded_file is not None:
                 st.info("Shared with all reports")
             
             default_recipients_expiry = config.get("coe_expiry_recipients", "")
-            recipients_expiry = st.text_input("Recipients (comma separated)", value=default_recipients_expiry, key="coe_expiry_recipients", help="Email recipients for COE Expiry Report")
+
+            # --- EXCOM QUICK FILL ---
+            excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+            if st.button("👥 Mail to Excoms", key="btn_excom_cte1", help="Auto-fill Executive emails"):
+                 st.session_state['coe_expiry_recipients'] = excom_list
+            
+            if 'coe_expiry_recipients' not in st.session_state:
+                 st.session_state['coe_expiry_recipients'] = default_recipients_expiry
+
+            recipients_expiry = st.text_input("Recipients (comma separated)", key="coe_expiry_recipients", help="Email recipients for COE Expiry Report")
             
             email_subject_expiry = st.text_input("Subject", f"COE Expiry Report - {datetime.now().date()}", key="subject_expiry")
             
@@ -339,7 +348,16 @@ Ashish Shrestha"""
                 st.subheader("📧 Email Current Month Sales Report")
                 
                 default_recipients_sales = config.get("coe_sales_recipients", "")
-                recipients_sales = st.text_input("Recipients (comma separated)", value=default_recipients_sales, key="coe_sales_recipients", help="Email recipients for Current Month Sales Report")
+
+                # --- EXCOM QUICK FILL ---
+                excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+                if st.button("👥 Mail to Excoms", key="btn_excom_cte2", help="Auto-fill Executive emails"):
+                     st.session_state['coe_sales_recipients'] = excom_list
+                
+                if 'coe_sales_recipients' not in st.session_state:
+                     st.session_state['coe_sales_recipients'] = default_recipients_sales
+
+                recipients_sales = st.text_input("Recipients (comma separated)", key="coe_sales_recipients", help="Email recipients for Current Month Sales Report")
                 
                 # Email subject - use unique key per month to force reactivity
                 subject_key = f"subject_sales_{selected_month_date.strftime('%Y_%m')}"
@@ -448,7 +466,16 @@ tr:nth-child(even) {{background-color: #f9f9f9;}}
                 st.info("Sends ONLY the 'Monthly Targets & Shortfall' table (No financials).")
                 
                 default_recipients_rep = config.get("coe_rep_recipients", "")
-                recipients_rep = st.text_input("Recipients (Sales Reps)", value=default_recipients_rep, key="coe_rep_recipients")
+
+                # --- EXCOM QUICK FILL ---
+                excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+                if st.button("👥 Mail to Excoms", key="btn_excom_cte3", help="Auto-fill Executive emails"):
+                     st.session_state['coe_rep_recipients'] = excom_list
+                
+                if 'coe_rep_recipients' not in st.session_state:
+                     st.session_state['coe_rep_recipients'] = default_recipients_rep
+
+                recipients_rep = st.text_input("Recipients (Sales Reps)", key="coe_rep_recipients")
                 
                 subject_key_rep = f"subject_rep_{selected_month_date.strftime('%Y_%m')}"
                 email_subject_rep = st.text_input("Subject", value=f"COE Update - {selected_month_date.strftime('%B %Y')}", key=subject_key_rep)

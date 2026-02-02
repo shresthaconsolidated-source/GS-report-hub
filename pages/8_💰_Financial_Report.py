@@ -460,7 +460,16 @@ try:
         
     with col_send:
         st.info("Configure sender details in the sidebar first.")
-        recipients = st.text_input("Recipients", value=config.get("recipients", "someone@example.com"))
+        
+        # --- EXCOM QUICK FILL ---
+        excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+        if st.button("👥 Mail to Excoms", help="Auto-fill Executive Committee emails"):
+             st.session_state['recipients_8'] = excom_list
+        
+        if 'recipients_8' not in st.session_state:
+             st.session_state['recipients_8'] = config.get("recipients", "someone@example.com")
+
+        recipients = st.text_input("Recipients", key="recipients_8")
         subject = st.text_input("Subject", f"Financial Report - {month_name}")
         
         if st.button("🚀 Send HTML Email", type="primary"):

@@ -108,7 +108,16 @@ if uploaded_file is not None:
         # Email details
         # Load default recipients from config
         default_recipients = config.get("recipients", "fixed_person1@example.com, fixed_person2@example.com")
-        recipients = st.text_input("Recipients (comma separated)", value=default_recipients)
+        
+        # --- EXCOM QUICK FILL ---
+        excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+        if st.button("👥 Mail to Excoms", key="btn_excom_1", help="Auto-fill Executive Committee emails"):
+             st.session_state['recipients_1'] = excom_list
+        
+        if 'recipients_1' not in st.session_state:
+             st.session_state['recipients_1'] = default_recipients
+
+        recipients = st.text_input("Recipients (comma separated)", key="recipients_1")
         
         # Now we can implement the Save button logic properly since 'recipients' is defined
         with st.sidebar:

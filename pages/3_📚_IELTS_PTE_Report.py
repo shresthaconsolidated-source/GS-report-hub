@@ -539,7 +539,16 @@ with st.spinner("Fetching data from Google Sheets..."):
             st.info("Using same email config as Visa Report")
         
         default_recipients = config.get("recipients", "")
-        recipients = st.text_input("Recipients (comma separated)", value=default_recipients, key="ielts_recipients")
+        
+        # --- EXCOM QUICK FILL ---
+        excom_list = "santosh@globalselect.com.au, Satish@globalselect.com.au, accounts@globalselect.com.au"
+        if st.button("👥 Mail to Excoms", key="btn_excom_ielts", help="Auto-fill Executive Committee emails"):
+             st.session_state['ielts_recipients'] = excom_list
+        
+        if 'ielts_recipients' not in st.session_state:
+             st.session_state['ielts_recipients'] = default_recipients
+
+        recipients = st.text_input("Recipients (comma separated)", key="ielts_recipients")
         
         # Get the actual latest month from payments data (for expenses reference if needed, but we use selection now)
         latest_payment_month = df_payments['MonthYear'].max()
