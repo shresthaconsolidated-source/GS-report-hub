@@ -325,7 +325,7 @@ try:
     <body>
         <div class="container">
             <div class="header">
-                <h2>Financial Overview</h2>
+                <h2>Nepal Finance Overview</h2>
                 <div style="color: #64748b;">{month_name}</div>
             </div>
             
