@@ -9,6 +9,11 @@ from email.mime.text import MIMEText
 import os
 import io
 import xlsxwriter
+import imaplib
+import email
+from email.header import decode_header
+import re
+from datetime import datetime
 
 
 # PAGE SETUP
@@ -199,6 +204,72 @@ def process_attendance_simple(df):
         })
     
     return pd.DataFrame(results)
+
+# --- EMAIL LEAVE TRACKER HELPERS ---
+
+CREDENTIALS_FILE = "credentials.json"
+
+def load_email_credentials():
+    if os.path.exists(CREDENTIALS_FILE):
+        try:
+            with open(CREDENTIALS_FILE, "r") as f:
+                return json.load(f)
+        except:
+            pass
+    return {"email": "", "password": ""}
+
+def save_email_credentials(email, password):
+    with open(CREDENTIALS_FILE, "w") as f:
+        json.dump({"email": email, "password": password}, f)
+
+def extract_name_from_signature(body):
+    patterns = [
+        r"(?:Best regards|Regards|Thanks|Cheers|Sincerely)[,\s]*\n\s*([A-Z][a-z]+ [A-Z][a-z]+)",
+        r"(?:Best regards|Regards|Thanks|Cheers|Sincerely)[,\s]*\n\s*([A-Z][a-z]+)"
+    ]
+    for p in patterns:
+        match = re.search(p, body, re.IGNORECASE | re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+def connect_to_gmail(username, password):
+    try:
+        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        mail.login(username, password)
+        return mail
+    except Exception as e:
+        return str(e)
+
+def extract_leave_details(subject, body):
+    subject_lower = subject.lower()
+    body_lower = body.lower()
+    
+    status = "Unknown"
+    if "sick" in subject_lower or "sick" in body_lower:
+        status = "Sick Leave"
+    elif "half" in subject_lower:
+        status = "Half Day"
+    elif "vacation" in subject_lower or "holiday" in subject_lower:
+        status = "Vacation"
+    elif "wfh" in subject_lower or "working from home" in subject_lower:
+        status = "WFH"
+    elif "early" in subject_lower or "departure" in subject_lower:
+        status = "Early Leave"
+    elif "application" in subject_lower or "request" in subject_lower:
+        status = "Leave Request"
+    return status
+
+def get_email_content(msg):
+    if msg.is_multipart():
+        for part in msg.walk():
+            content_type = part.get_content_type()
+            content_disposition = str(part.get("Content-Disposition"))
+            if content_type == "text/plain" and "attachment" not in content_disposition:
+                return part.get_payload(decode=True).decode()
+    else:
+        return msg.get_payload(decode=True).decode()
+    return ""
 
 # PURE HTML/JS DASHBOARD TEMPLATE
 HTML_TEMPLATE = """
@@ -504,6 +575,32 @@ HTML_TEMPLATE = """
             </div>
         </div>
 
+
+    </div>
+
+    <!-- ALL EMPLOYEES TABLE (NEW) -->
+    <div class="section-container" style="margin-top: 20px;">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>All Employees Overview</span>
+            <span style="font-size:10px; opacity:0.7;">Select to Mail</span>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="30"><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                        <th>Employee</th>
+                        <th style="text-align:center;">Present</th>
+                        <th style="text-align:center;">Late</th>
+                        <th style="text-align:center;">Early</th>
+                        <th style="text-align:center;">Avg Hrs</th>
+                        <th style="text-align:center;">Risk</th>
+                        <th style="text-align:center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="list-all"></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -525,6 +622,7 @@ HTML_TEMPLATE = """
     function init() {
         updateMetrics();
         renderTopLists();
+        renderAllEmployees();
         populateEmployeeSelect();
         renderCalendar();
     }
@@ -789,6 +887,35 @@ HTML_TEMPLATE = """
         document.getElementById('modal-body').innerHTML = `<table class="detail-table"><thead><tr><th>Date</th><th>Entry</th><th>Exit</th><th>Hours</th><th>Status</th></tr></thead><tbody>${html}</tbody></table>`;
     }
 
+    function renderAllEmployees() {
+        const sorted = [...stats].sort((a,b) => a.Employee.localeCompare(b.Employee));
+        document.getElementById('list-all').innerHTML = sorted.map(emp => {
+            let statusBadge = '<span class="status-badge badge-green">OK</span>';
+            if(emp.ChronicLate) statusBadge = '<span class="status-badge badge-red">Chronic Late</span>';
+            else if(emp.TotalRiskDays > 0) statusBadge = '<span class="status-badge badge-orange">Risk</span>';
+            
+            return `
+            <tr>
+                <td style="text-align:center;"><input type="checkbox" class="row-check" value="${emp.Employee}" onchange="toggleSelect(this)"></td>
+                <td><div class="emp-name" onclick="openEmpDetail('${emp.Employee}')">👤 ${emp.Employee}</div></td>
+                <td style="text-align:center;">${emp.PresentDays}</td>
+                <td style="text-align:center;">${emp.LateDays}</td>
+                <td style="text-align:center;">${emp.EarlyExitDays}</td>
+                <td style="text-align:center; font-weight:600;">${emp.AvgWorkHours.toFixed(1)}</td>
+                <td style="text-align:center; font-weight:bold; color:${emp.TotalRiskDays > 0 ? '#e74c3c' : '#2ecc71'};">${emp.TotalRiskDays}</td>
+                <td style="text-align:center;">${statusBadge}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll('.row-check');
+        checkboxes.forEach(cb => {
+            cb.checked = source.checked;
+            toggleSelect(cb);
+        });
+    }
+
     function showModal() { document.getElementById('modal').style.display = 'flex'; }
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
     function handleOverlayClick(e) { if(e.target.id === 'modal') closeModal(); }
@@ -800,71 +927,247 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# MAIN APP LOGIC
-st.markdown("<div class='page-title'>📅 Attendance Report (Interactive)</div>", unsafe_allow_html=True)
+# MAIN APP LOGIC AND TABS
+st.markdown("<h2 style='text-align: center;'>Attendance & Leave Management</h2>", unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Upload Excel Attendance Sheet", type=['xlsx', 'xls', 'csv'])
+tab_attendance, tab_leave = st.tabs(["📊 Regular Attendance Report", "📧 Email Leave Tracker"])
 
-if uploaded_file is not None:
-    try:
-        file_name = uploaded_file.name.lower()
-        if file_name.endswith('.csv'):
-            df_raw = pd.read_csv(uploaded_file)
-        elif file_name.endswith('.xls'):
-            df_raw = pd.read_excel(uploaded_file, engine='xlrd')
-        elif file_name.endswith('.xlsx'):
-            df_raw = pd.read_excel(uploaded_file, engine='openpyxl')
+# --- TAB 1: EXISTING ATTENDANCE REPORT ---
+with tab_attendance:
+    st.markdown("<div class='page-title'>📅 Attendance Report (Interactive)</div>", unsafe_allow_html=True)
+
+    uploaded_file = st.file_uploader("Upload Excel Attendance Sheet", type=['xlsx', 'xls', 'csv'])
+
+    if uploaded_file is not None:
+        try:
+            file_name = uploaded_file.name.lower()
+            if file_name.endswith('.csv'):
+                df_raw = pd.read_csv(uploaded_file)
+            elif file_name.endswith('.xls'):
+                df_raw = pd.read_excel(uploaded_file, engine='xlrd')
+            elif file_name.endswith('.xlsx'):
+                df_raw = pd.read_excel(uploaded_file, engine='openpyxl')
+                
+            df_daily = process_attendance_simple(df_raw)
             
-        df_daily = process_attendance_simple(df_raw)
-        
-        # EXPORT BUTTON (Accounts)
-        if df_daily is not None and not df_daily.empty:
-            excel_data = generate_excel_report(df_daily)
-            st.sidebar.markdown("### 📥 Reports")
-            st.sidebar.download_button(
-                label="Download Accounts Excel",
-                data=excel_data,
-                file_name="Attendance_Accounts_Format.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                icon="📊"
-            )
+            # EXPORT BUTTON (Accounts)
+            if df_daily is not None and not df_daily.empty:
+                excel_data = generate_excel_report(df_daily)
+                st.download_button(
+                    label="📥 Download Accounts Excel",
+                    data=excel_data,
+                    file_name="Attendance_Accounts_Format.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                )
+                
+                # 1. PROCESS STATS IN PYTHON
+                try:
+                    # Ensure date parsing works for total days calculation
+                    dates = pd.to_datetime(df_daily['Date'])
+                    total_days_in_month = dates.dt.day.max()
+                except:
+                    total_days_in_month = 30 # Fallback
+                
+                employee_stats = df_daily.groupby('Employee').agg({
+                    'Date': 'count',
+                    'WorkHours': 'mean',
+                    'IsLate': 'sum',
+                    'IsEarlyExit': 'sum',
+                    'IsCompliant': 'sum'
+                }).reset_index()
+                
+                employee_stats.columns = ['Employee', 'PresentDays', 'AvgWorkHours', 'LateDays', 'EarlyExitDays', 'CompliantDays']
+                employee_stats['AttendancePct'] = (employee_stats['PresentDays'] / total_days_in_month * 100).round(1)
+                employee_stats['ChronicLate'] = (employee_stats['LateDays'] / employee_stats['PresentDays']) >= CHRONIC_LATE_THRESHOLD
+                employee_stats['UnderHours'] = employee_stats['AvgWorkHours'] < REQUIRED_HOURS
+                employee_stats['AvgDeviation'] = (employee_stats['AvgWorkHours'] - REQUIRED_HOURS).round(1)
+                employee_stats['TotalRiskDays'] = employee_stats['LateDays'] + employee_stats['EarlyExitDays']
+                
+                # 2. CONVERT TO JSON FOR JS
+                stats_json = employee_stats.to_json(orient="records")
+                daily_json = df_daily.to_json(orient="records")
+                
+                # 3. STATS & TABLES INJECTED INTO HTML
+                final_html = HTML_TEMPLATE.replace("{STATS_JSON}", stats_json).replace("{DAILY_JSON}", daily_json)
+                
+                # Render Dashboard
+                components.html(final_html, height=850, scrolling=True) 
+                
+        except Exception as e:
+            import traceback
+            st.error(f"Error processing file: {e}")
+            st.write(traceback.format_exc())
+
+# --- TAB 2: EMAIL LEAVE TRACKER ---
+with tab_leave:
+    st.info("Scan your Gmail for leave requests and view them here.")
+    
+    # Load saved credentials
+    creds = load_email_credentials()
+    
+    col_con, col_filt = st.columns(2)
+    
+    with col_con:
+        with st.expander("🔌 Connection Settings", expanded=True):
+            email_user = st.text_input("Gmail Address", value=creds.get("email", ""), placeholder="name@gmail.com")
+            email_pass = st.text_input("App Password", value=creds.get("password", ""), type="password", help="Generate in Google > Security > App Passwords")
+            st.markdown("[Help](https://support.google.com/accounts/answer/185833)")
+
+    with col_filt:
+        with st.expander("🔍 Filter Settings", expanded=True):
+            col_d1, col_d2 = st.columns(2)
+            with col_d1:
+                filter_start_date = st.date_input("Start Date", datetime(datetime.now().year, 1, 1))
+            with col_d2:
+                filter_end_date = st.date_input("End Date", datetime(datetime.now().year, 12, 31))
             
-            # 1. PROCESS STATS IN PYTHON
-            try:
-                # Ensure date parsing works for total days calculation
-                dates = pd.to_datetime(df_daily['Date'])
-                total_days_in_month = dates.dt.day.max()
-            except:
-                total_days_in_month = 30 # Fallback
+            search_query = st.text_input("Search Keywords (Subject)", value='Leave OR Sick OR WFH OR Day off OR Vacation OR Departure OR Application')
+            limit = st.slider("Max Emails to Scan", 10, 100, 50)
             
-            employee_stats = df_daily.groupby('Employee').agg({
-                'Date': 'count',
-                'WorkHours': 'mean',
-                'IsLate': 'sum',
-                'IsEarlyExit': 'sum',
-                'IsCompliant': 'sum'
-            }).reset_index()
-            
-            employee_stats.columns = ['Employee', 'PresentDays', 'AvgWorkHours', 'LateDays', 'EarlyExitDays', 'CompliantDays']
-            employee_stats['AttendancePct'] = (employee_stats['PresentDays'] / total_days_in_month * 100).round(1)
-            employee_stats['ChronicLate'] = (employee_stats['LateDays'] / employee_stats['PresentDays']) >= CHRONIC_LATE_THRESHOLD
-            employee_stats['UnderHours'] = employee_stats['AvgWorkHours'] < REQUIRED_HOURS
-            employee_stats['AvgDeviation'] = (employee_stats['AvgWorkHours'] - REQUIRED_HOURS).round(1)
-            employee_stats['TotalRiskDays'] = employee_stats['LateDays'] + employee_stats['EarlyExitDays']
-            
-            # 2. CONVERT TO JSON FOR JS
-            stats_json = employee_stats.to_json(orient="records")
-            daily_json = df_daily.to_json(orient="records")
-            
-            # 3. STATS & TABLES INJECTED INTO HTML
-            final_html = HTML_TEMPLATE.replace("{STATS_JSON}", stats_json).replace("{DAILY_JSON}", daily_json)
-            
-            # Render Dashboard
-            components.html(final_html, height=850, scrolling=True) 
-            
-            # --- PYTHON ADMIN SECTION REMOVED (Reverted to JS Manual Workflow) ---
-            
-    except Exception as e:
-        import traceback
-        st.error(f"Error processing file: {e}")
-        st.write(traceback.format_exc())
+    # Action Button
+    fetch_btn = st.button("🔍 Find Leave Emails", type="primary")
+
+    if fetch_btn:
+        if not email_user or not email_pass:
+            st.error("Please enter both Gmail Address and App Password.")
+        else:
+            with st.spinner("Connecting to Gmail..."):
+                mail = connect_to_gmail(email_user, email_pass)
+                
+                if isinstance(mail, str): # Error message
+                    st.error(f"Failed to connect: {mail}")
+                else:
+                    st.success("Connected! Scanning emails...")
+                    
+                    # Save credentials
+                    save_email_credentials(email_user, email_pass)
+                    
+                    mail.select("inbox")
+                    
+                    # Strategy: Fetch latest N emails and filter in Python
+                    _, msg_data = mail.search(None, "ALL")
+                    all_email_ids = msg_data[0].split()
+                    email_ids = all_email_ids[::-1][:limit]
+                    
+                    leaves = []
+                    progress_bar = st.progress(0)
+                    text_status = st.empty()
+                    
+                    # Prepare keywords
+                    clean_query = search_query.replace("subject:(", "").replace(")", "").replace('"', "")
+                    keywords = [k.strip() for k in clean_query.split("OR") if k.strip()]
+                    
+                    for i, e_id in enumerate(email_ids):
+                        text_status.text(f"Scanning email {i+1}/{len(email_ids)}...")
+                        
+                        # Request X-GM-THRID (Thread ID) for better links, along with the body
+                        _, msg_data = mail.fetch(e_id, "(RFC822 X-GM-THRID)")
+                        
+                        email_body_data = None
+                        thread_id = None
+                        
+                        for response_part in msg_data:
+                            if isinstance(response_part, tuple):
+                                metadata = response_part[0].decode()
+                                if "X-GM-THRID" in metadata:
+                                    try:
+                                        thrid_match = re.search(r'X-GM-THRID\s+(\d+)', metadata)
+                                        if thrid_match:
+                                            thread_id = thrid_match.group(1)
+                                    except:
+                                        pass
+                                email_body_data = response_part[1]
+                        
+                        if email_body_data:
+                            msg = email.message_from_bytes(email_body_data)
+                            
+                            # Subject
+                            subject, encoding = decode_header(msg["Subject"])[0]
+                            if isinstance(subject, bytes):
+                                subject = subject.decode(encoding if encoding else "utf-8")
+                                
+                            # From
+                            from_ = msg.get("From")
+                            sender_name = from_.split("<")[0].replace('"', '').strip()
+                            
+                            # Body
+                            body = get_email_content(msg)
+                            
+                            # Filter
+                            match_found = False
+                            for key in keywords:
+                                if key.lower() in subject.lower():
+                                    match_found = True
+                                    break
+                            
+                            if not match_found:
+                                continue 
+                            
+                            # Details
+                            signature_name = extract_name_from_signature(body)
+                            display_name = signature_name if signature_name else sender_name
+                            email_date_obj = email.utils.parsedate_to_datetime(msg.get("Date"))
+                            leave_status = extract_leave_details(subject, body)
+                            
+                            # Link
+                            link = "#"
+                            if thread_id:
+                                try:
+                                    hex_thrid = hex(int(thread_id))[2:] 
+                                    link = f"https://mail.google.com/mail/u/0/#inbox/{hex_thrid}"
+                                except:
+                                    pass
+                            
+                            if link == "#":
+                                message_id = msg.get("Message-ID", "").strip()
+                                clean_msg_id = "".join(message_id.split()).replace("<", "").replace(">", "")
+                                link = f"https://mail.google.com/mail/u/0/#search/rfc822msgid%3A{clean_msg_id}"
+                            
+                            # Date Check
+                            email_date_only = email_date_obj.date()
+                            if filter_start_date <= email_date_only <= filter_end_date:
+                                leaves.append({
+                                    "Name": display_name,
+                                    "Sender": sender_name,
+                                    "Date": email_date_obj.strftime("%b %d, %Y"),
+                                    "Status": leave_status,
+                                    "Subject": subject,
+                                    "Link": link
+                                })
+                        
+                        progress_bar.progress((i + 1) / len(email_ids))
+                    
+                    text_status.empty()
+                    st.subheader(f"Found {len(leaves)} potential leave emails")
+                    
+                    if leaves:
+                        leaves_by_staff = {}
+                        for leave in leaves:
+                            name = leave['Name']
+                            if name not in leaves_by_staff:
+                                leaves_by_staff[name] = []
+                            leaves_by_staff[name].append(leave)
+                            
+                        sorted_names = sorted(leaves_by_staff.keys())
+                        
+                        for name in sorted_names:
+                            staff_leaves = leaves_by_staff[name]
+                            with st.container():
+                                st.markdown(f"### {name}")
+                                for leave in staff_leaves:
+                                    c1, c2, c3, c4 = st.columns([2, 2, 2, 1])
+                                    with c1: st.caption(leave['Date'])
+                                    with c2:
+                                        color = "grey"
+                                        if "Sick" in leave['Status']: color = "red"
+                                        elif "Vacation" in leave['Status']: color = "green"
+                                        elif "Half" in leave['Status']: color = "orange"
+                                        elif "WFH" in leave['Status']: color = "blue"
+                                        st.markdown(f":{color}[{leave['Status']}]")
+                                    with c3: st.markdown(f"*{leave['Subject']}*")
+                                    with c4: st.markdown(f"[View]({leave['Link']})")
+                                st.divider()
+                    else:
+                        st.info("No matching emails found.")
+
+                    mail.logout()
