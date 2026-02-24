@@ -257,6 +257,14 @@ REPORTS = [
         "category": "Sales & Operations",
         "category_short": "Sales",
         "page": "pages/8_💰_Financial_Report.py"
+    },
+    {
+        "title": "Commission Inquiry",
+        "icon": "💴",
+        "desc": "Filter sales tracker by month across 20 schedules. Automated red-mark detection.",
+        "category": "Sales & Operations",
+        "category_short": "Sales",
+        "page": "pages/9_💴_Commission_Inquiry.py"
     }
 ]
 
