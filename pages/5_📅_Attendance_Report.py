@@ -205,6 +205,93 @@ def process_attendance_simple(df):
     
     return pd.DataFrame(results)
 
+def process_attendance_chabahil(df):
+    df.columns = df.columns.str.strip()
+    
+    # Columns expected: 'First Name', 'Last Name', 'Date', 'Check-In Time'
+    first_name_col = None
+    last_name_col = None
+    date_col = None
+    time_col = None
+    
+    for col in df.columns:
+        col_lower = col.lower()
+        if 'first name' in col_lower:
+            first_name_col = col
+        elif 'last name' in col_lower:
+            last_name_col = col
+        elif 'date' == col_lower:
+            date_col = col
+        elif 'check-in time' in col_lower:
+            time_col = col
+            
+    if not first_name_col or not last_name_col or not date_col or not time_col:
+        st.error(f"⚠️ Could not find exact required columns (First Name, Last Name, Date, Check-In Time). Found: {list(df.columns)}")
+        return None
+
+    # Combine names
+    df['Employee'] = df[first_name_col].astype(str).str.strip() + " " + df[last_name_col].astype(str).str.strip()
+    
+    # Combine date and time
+    try:
+        df['Timestamp_str'] = df[date_col].astype(str) + ' ' + df[time_col].astype(str)
+        df['Timestamp'] = pd.to_datetime(df['Timestamp_str'], errors='coerce')
+    except Exception as e:
+        st.error(f"⚠️ Error parsing Date/Time columns: {e}")
+        return None
+
+    df = df.dropna(subset=['Timestamp'])
+    df['Date'] = df['Timestamp'].dt.strftime('%Y-%m-%d')
+    
+    results = []
+    grouped = df.groupby(['Employee', 'Date'])
+    
+    for (emp, date), group in grouped:
+        punches = group['Timestamp'].sort_values()
+        
+        if len(punches) < 1:
+            continue
+        
+        first_in = punches.iloc[0]
+        last_out = punches.iloc[-1]
+        
+        # If only 1 punch, they checked in but never out. We will consider work_hours as 0 or calculate using just first_in
+        work_hours = (last_out - first_in).total_seconds() / 3600
+        
+        is_late = first_in.time() > LATE_THRESHOLD
+        
+        if work_hours >= REQUIRED_HOURS:
+            is_early_exit = False
+        else:
+            is_early_exit = last_out.time() < EXIT_THRESHOLD
+            
+        is_compliant = work_hours >= REQUIRED_HOURS and not is_late
+        
+        if is_compliant:
+            note = "Compliant"
+        elif is_late and is_early_exit:
+            note = "Late Entry & Early Exit"
+        elif is_late:
+            note = "Late Entry"
+        elif is_early_exit:
+            note = "Early Exit"
+        else:
+            note = "Compliant"
+
+        results.append({
+            'Employee': emp,
+            'Date': date,
+            'FirstIn': first_in.strftime('%H:%M:%S'),
+            'LastOut': last_out.strftime('%H:%M:%S'),
+            'WorkHours': round(work_hours, 1),
+            'IsLate': bool(is_late),
+            'IsEarlyExit': bool(is_early_exit),
+            'IsCompliant': bool(is_compliant),
+            'Note': note
+        })
+    
+    return pd.DataFrame(results)
+
 # --- EMAIL LEAVE TRACKER HELPERS ---
 
 CREDENTIALS_FILE = "credentials.json"
@@ -930,9 +1017,9 @@ HTML_TEMPLATE = """
 # MAIN APP LOGIC AND TABS
 st.markdown("<h2 style='text-align: center;'>Attendance & Leave Management</h2>", unsafe_allow_html=True)
 
-tab_attendance, tab_leave = st.tabs(["📊 Regular Attendance Report", "📧 Email Leave Tracker"])
+tab_attendance, tab_chabahil, tab_leave = st.tabs(["📊 Putalisadak Attendance", "🏢 Chabahil Attendance", "📧 Email Leave Tracker"])
 
-# --- TAB 1: EXISTING ATTENDANCE REPORT ---
+# --- TAB 1: EXISTING ATTENDANCE REPORT (PUTALISADAK) ---
 with tab_attendance:
     st.markdown("<div class='page-title'>📅 Attendance Report (Interactive)</div>", unsafe_allow_html=True)
 
@@ -998,7 +1085,78 @@ with tab_attendance:
             st.error(f"Error processing file: {e}")
             st.write(traceback.format_exc())
 
-# --- TAB 2: EMAIL LEAVE TRACKER ---
+# --- TAB 2: CHABAHIL ATTENDANCE REPORT ---
+with tab_chabahil:
+    st.markdown("<div class='page-title'>📅 Chabahil Attendance Report (Interactive)</div>", unsafe_allow_html=True)
+    
+    uploaded_file_c = st.file_uploader("Upload Excel Attendance Sheet (Chabahil)", type=['xlsx', 'xls', 'csv'], key="uploader_chabahil")
+
+    if uploaded_file_c is not None:
+        try:
+            file_name = uploaded_file_c.name.lower()
+            skip_rows = 7
+            
+            if file_name.endswith('.csv'):
+                df_raw_c = pd.read_csv(uploaded_file_c, skiprows=skip_rows)
+            elif file_name.endswith('.xls'):
+                df_raw_c = pd.read_excel(uploaded_file_c, engine='xlrd', skiprows=skip_rows)
+            elif file_name.endswith('.xlsx'):
+                df_raw_c = pd.read_excel(uploaded_file_c, engine='openpyxl', skiprows=skip_rows)
+                
+            df_daily_c = process_attendance_chabahil(df_raw_c)
+            
+            # EXPORT BUTTON (Accounts)
+            if df_daily_c is not None and not df_daily_c.empty:
+                excel_data_c = generate_excel_report(df_daily_c)
+                
+                # We specifically use octet-stream for Chabahil initially if the old way completely failed for them, 
+                # but to be safe we'll use the original working MIME type first since Putalisadak works with it
+                st.download_button(
+                    label="📥 Download Accounts Excel",
+                    data=excel_data_c,
+                    file_name="Attendance_Accounts_Format_Chabahil.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="dl_chabahil"
+                )
+                
+                # 1. PROCESS STATS IN PYTHON
+                try:
+                    dates_c = pd.to_datetime(df_daily_c['Date'])
+                    total_days_in_month_c = dates_c.dt.day.max()
+                except:
+                    total_days_in_month_c = 30 # Fallback
+                
+                employee_stats_c = df_daily_c.groupby('Employee').agg({
+                    'Date': 'count',
+                    'WorkHours': 'mean',
+                    'IsLate': 'sum',
+                    'IsEarlyExit': 'sum',
+                    'IsCompliant': 'sum'
+                }).reset_index()
+                
+                employee_stats_c.columns = ['Employee', 'PresentDays', 'AvgWorkHours', 'LateDays', 'EarlyExitDays', 'CompliantDays']
+                employee_stats_c['AttendancePct'] = (employee_stats_c['PresentDays'] / total_days_in_month_c * 100).round(1)
+                employee_stats_c['ChronicLate'] = (employee_stats_c['LateDays'] / employee_stats_c['PresentDays']) >= CHRONIC_LATE_THRESHOLD
+                employee_stats_c['UnderHours'] = employee_stats_c['AvgWorkHours'] < REQUIRED_HOURS
+                employee_stats_c['AvgDeviation'] = (employee_stats_c['AvgWorkHours'] - REQUIRED_HOURS).round(1)
+                employee_stats_c['TotalRiskDays'] = employee_stats_c['LateDays'] + employee_stats_c['EarlyExitDays']
+                
+                # 2. CONVERT TO JSON FOR JS
+                stats_json_c = employee_stats_c.to_json(orient="records")
+                daily_json_c = df_daily_c.to_json(orient="records")
+                
+                # 3. STATS & TABLES INJECTED INTO HTML
+                final_html_c = HTML_TEMPLATE.replace("{STATS_JSON}", stats_json_c).replace("{DAILY_JSON}", daily_json_c)
+                
+                # Render Dashboard
+                components.html(final_html_c, height=850, scrolling=True) 
+                
+        except Exception as e:
+            import traceback
+            st.error(f"Error processing file: {e}")
+            st.write(traceback.format_exc())
+
+# --- TAB 3: EMAIL LEAVE TRACKER ---
 with tab_leave:
     st.info("Scan your Gmail for leave requests and view them here.")
     
