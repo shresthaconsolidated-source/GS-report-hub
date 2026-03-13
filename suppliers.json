@@ -1,0 +1,22 @@
+[
+  {
+    "id": "1",
+    "name": "Eve Miringching Magar",
+    "abn": "37 836 121 282",
+    "address": "2/27 Cypress Street Adelaide SA 4000",
+    "phone": "0452 106 335",
+    "bank_name": "Commonwealth Bank",
+    "bsb": "065-000",
+    "account_number": "1262 8218"
+  },
+  {
+    "id": "2",
+    "name": "Rabeea Salman AHMED",
+    "abn": "75 916 211 957",
+    "address": "49 Awoonga Road Highbury 5089",
+    "phone": "0481 039 019",
+    "bank_name": "Commonwealth Bank",
+    "bsb": "065-145",
+    "account_number": "10600493"
+  }
+]

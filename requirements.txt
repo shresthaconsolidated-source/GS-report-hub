@@ -8,3 +8,5 @@ plotly
 numpy
 xlrd
 python-docx
+
+python-docx>=1.2.0

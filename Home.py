@@ -265,6 +265,14 @@ REPORTS = [
         "category": "Sales & Operations",
         "category_short": "Sales",
         "page": "pages/9_💴_Commission_Inquiry.py"
+    },
+    {
+        "title": "RCTI Invoice",
+        "icon": "🧾",
+        "desc": "Generate Recipient Created Tax Invoices for Subcontractors.",
+        "category": "Human Resources",
+        "category_short": "HR",
+        "page": "pages/10_🧾_RCTI_Invoice.py"
     }
 ]
 
