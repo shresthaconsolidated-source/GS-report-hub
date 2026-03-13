@@ -60,8 +60,11 @@ def generate_invoice(supplier, invoice_date, invoice_no, period_str, amount, out
     table = doc.tables[0]
     
     # Table 0 Row 1 Col 0: Description
+    # This cell has two paragraphs in the template, so we clear the second one
     desc_text = f"Subcontractor service to Global Select Education and Migration Pty Ltd\n({period_str})"
     _replace_paragraph_text(table.cell(1, 0).paragraphs[0], desc_text)
+    if len(table.cell(1, 0).paragraphs) > 1:
+        _clear_paragraph(table.cell(1, 0).paragraphs[1])
     
     amount_str = f"{float(amount):,.0f}" if float(amount).is_integer() else f"{float(amount):,.2f}"
     
